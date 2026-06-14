@@ -1,0 +1,4744 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>숙련도 트래커</title>
+
+  <style>
+    :root {
+      --bg: #080b12;
+      --card: #121722;
+      --card2: #1b2230;
+      --text: #f5f5f5;
+      --muted: #a1a1aa;
+      --line: #2d3748;
+      --main: #8b5cf6;
+      --main2: #a78bfa;
+      --good: #22c55e;
+      --danger: #ef4444;
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(139, 92, 246, 0.25), transparent 32%),
+        radial-gradient(circle at top right, rgba(34, 197, 94, 0.12), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 18px;
+    }
+
+    .container {
+      width: min(1200px, 100%);
+      margin: 0 auto;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 18px;
+      align-items: stretch;
+      min-height: calc(100vh - 36px);
+    }
+
+    .card {
+      background: rgba(18, 23, 34, 0.94);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
+      height: 100%;
+    }
+
+    .left-card,
+    .right-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 21px;
+    }
+
+    .login-box {
+      background: rgba(27, 34, 48, 0.55);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+
+    .login-status {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      word-break: break-all;
+    }
+
+    .nickname-box {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .nickname-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .nickname-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    .nickname-help {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .save-status {
+      color: var(--good);
+      font-size: 12px;
+      margin-top: 10px;
+      min-height: 18px;
+    }
+
+    .login-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 13px;
+      padding: 13px 16px;
+      color: white;
+      background: var(--main);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      filter: brightness(1.08);
+    }
+
+    .btn-secondary {
+      background: #374151;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .summary-box {
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 15px;
+    }
+
+    .summary-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .summary-box strong {
+      font-size: 26px;
+    }
+
+    .progress-group {
+      display: grid;
+      gap: 14px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .bar {
+      height: 14px;
+      background: #0d111a;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--main), var(--good));
+      border-radius: 999px;
+      transition: 0.25s;
+    }
+
+    .category-area {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      flex: 1;
+    }
+
+    .category-section {
+      background: rgba(27, 34, 48, 0.55);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .category-section-title {
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .category-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .category-btn {
+      background: var(--card2);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 13px 10px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: 0.2s;
+    }
+
+    .category-btn.active {
+      background: rgba(139, 92, 246, 0.25);
+      border-color: var(--main2);
+      color: #ddd6fe;
+    }
+
+    .category-btn:hover {
+      border-color: var(--main2);
+      transform: translateY(-1px);
+    }
+
+    .right-card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .badge-wrap {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      background: rgba(139, 92, 246, 0.18);
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      color: #c4b5fd;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .equipment-input-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .equipment-input-card {
+      width: 100%;
+      background: #101620;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .equipment-name {
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--text);
+      border-radius: 13px;
+      padding: 13px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--main2);
+    }
+
+    input:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .mini-bar {
+      height: 8px;
+      background: #080b12;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .mini-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--main2), var(--good));
+      border-radius: 999px;
+      transition: 0.25s;
+    }
+
+    .small-text {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 7px;
+    }
+
+    .btn-danger {
+      width: 100%;
+      margin-top: 16px;
+      border: 0;
+      border-radius: 13px;
+      padding: 13px 16px;
+      color: white;
+      background: var(--danger);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-danger:hover {
+      filter: brightness(1.08);
+    }
+
+
+
+    .access-gate {
+      width: min(520px, 100%);
+      margin: 70px auto;
+      background: rgba(18, 23, 34, 0.94);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
+    }
+
+    .access-gate p {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    body.access-locked .top-tabs,
+    body.access-locked .tab-panel {
+      display: none !important;
+    }
+
+    .utc-text-item {
+      min-width: 54px;
+      min-height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: rgba(139, 92, 246, 0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      color: #ddd6fe;
+      font-size: 11px;
+      font-weight: 1000;
+      text-align: center;
+      line-height: 1.2;
+      cursor: help;
+      word-break: keep-all;
+    }
+
+    .top-tabs {
+      width: min(1200px, 100%);
+      margin: 0 auto 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .tab-btn-main {
+      border: 1px solid var(--line);
+      background: rgba(18, 23, 34, 0.94);
+      color: var(--muted);
+      border-radius: 16px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tab-btn-main.active {
+      color: #ddd6fe;
+      border-color: var(--main2);
+      background: rgba(139, 92, 246, 0.25);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .utc-main-head {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .utc-mass-center {
+      display: contents;
+    }
+
+    .utc-mass-text {
+      text-align: center;
+      color: #ddd6fe;
+      font-size: clamp(22px, 4vw, 42px);
+      font-weight: 1000;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin: 8px 0 18px;
+    }
+
+    .utc-card {
+      min-height: calc(100vh - 120px);
+    }
+
+    .utc-desc {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .utc-mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .utc-mode-btn {
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--muted);
+      border-radius: 16px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .utc-mode-btn.active {
+      color: #ddd6fe;
+      border-color: var(--main2);
+      background: rgba(139, 92, 246, 0.25);
+    }
+
+    .utc-sheet-head {
+      background: rgba(27, 34, 48, 0.55);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .utc-sheet-title {
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .utc-sheet-sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .utc-content-layout {
+      display: grid;
+      grid-template-columns: 210px minmax(0, 1fr) 210px;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .utc-participant-sidebar {
+      position: sticky;
+      top: 12px;
+      background: rgba(16, 22, 32, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 10px;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .utc-sidebar-title {
+      font-size: 16px;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .utc-sidebar-sub {
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .utc-participant-panel {
+      display: grid;
+      gap: 7px;
+    }
+
+    .utc-sidebar-role {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 6px;
+      background: rgba(27, 34, 48, 0.55);
+    }
+
+    .utc-sidebar-role-title {
+      font-weight: 900;
+      margin-bottom: 4px;
+      color: #ddd6fe;
+      font-size: 12px;
+    }
+
+    .utc-sidebar-slot-btn {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 5px 6px;
+      margin-top: 4px;
+      cursor: pointer;
+      text-align: left;
+      font-weight: 900;
+      transition: 0.2s;
+      min-height: 0;
+    }
+
+    .utc-sidebar-slot-btn:hover {
+      border-color: var(--main2);
+      transform: translateY(-1px);
+    }
+
+    .utc-sidebar-slot-btn.joined {
+      background: rgba(139, 92, 246, 0.24);
+      border-color: var(--main2);
+      color: #ddd6fe;
+    }
+
+    .utc-sidebar-slot-btn.occupied {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.35);
+      color: #86efac;
+    }
+
+    .utc-sidebar-weapon {
+      display: block;
+      font-size: 11px;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .utc-sidebar-user {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .utc-slot.joined {
+      border-color: var(--main2);
+      background: rgba(139, 92, 246, 0.18);
+      box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.12);
+    }
+
+    .utc-slot.occupied {
+      border-color: rgba(34, 197, 94, 0.45);
+      background: rgba(34, 197, 94, 0.10);
+    }
+
+    .utc-slot-participant {
+      border: 1px solid var(--line);
+      background: rgba(8, 11, 18, 0.55);
+      border-radius: 12px;
+      padding: 9px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .utc-slot-participant.joined {
+      color: #ddd6fe;
+      border-color: var(--main2);
+      background: rgba(139, 92, 246, 0.18);
+    }
+
+    .utc-slot-participant.occupied {
+      color: #86efac;
+      border-color: rgba(34, 197, 94, 0.35);
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    .utc-role-nav-group {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .utc-party-nav-title {
+      padding: 9px 12px;
+      border-radius: 13px;
+      background: rgba(139, 92, 246, 0.16);
+      border: 1px solid rgba(167, 139, 250, 0.32);
+      color: #ddd6fe;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .utc-role-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+      position: sticky;
+      top: 10px;
+      z-index: 5;
+    }
+
+    .utc-role-nav-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .utc-role-nav-btn {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px 8px;
+      color: var(--text);
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.2s;
+      background: var(--card2);
+      font-size: 13px;
+    }
+
+    .utc-role-nav-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--main2);
+    }
+
+    .utc-status-empty {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.38);
+      color: #fca5a5;
+    }
+
+    .utc-status-partial {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: rgba(245, 158, 11, 0.38);
+      color: #fcd34d;
+    }
+
+    .utc-status-full {
+      background: rgba(34, 197, 94, 0.16);
+      border-color: rgba(34, 197, 94, 0.38);
+      color: #86efac;
+    }
+
+    .utc-mass-badge {
+      color: #ddd6fe;
+      font-size: 28px;
+      font-weight: 1000;
+      text-align: center;
+    }
+
+    .utc-slot-build {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 8px;
+      align-items: start;
+      width: 100%;
+      max-width: 100%;
+      overflow: visible;
+    }
+
+    .utc-gear-cell {
+      min-height: 0;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(8, 11, 18, 0.45);
+      padding: 6px;
+      display: grid;
+      align-content: start;
+      gap: 5px;
+      overflow: visible;
+    }
+
+    .utc-gear-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .utc-gear-options {
+      display: grid;
+      gap: 5px;
+      align-content: start;
+    }
+
+    .utc-gear-option {
+      position: relative;
+      display: grid;
+      justify-items: center;
+      align-items: center;
+      color: var(--text);
+      font-size: 11px;
+      line-height: 1.25;
+      text-align: center;
+      word-break: keep-all;
+      min-height: 0;
+    }
+
+    .utc-empty-item {
+      width: 54px;
+      height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: var(--muted);
+      cursor: help;
+    }
+
+    .utc-empty-icon {
+      font-size: 18px;
+      font-weight: 1000;
+      line-height: 1;
+    }
+
+    .utc-empty-text {
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .utc-gear-icon {
+      width: 54px;
+      height: 54px;
+      object-fit: contain;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      padding: 3px;
+      cursor: help;
+    }
+
+    .utc-gear-name {
+      display: none;
+    }
+
+    .utc-gear-option::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 9px);
+      transform: translateX(-50%);
+      background: #0b1020;
+      border: 1px solid var(--main2);
+      color: #f5f5f5;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.15s;
+      z-index: 20;
+    }
+
+    .utc-gear-option:hover::after {
+      opacity: 1;
+    }
+
+    .utc-sheet-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .utc-party-label {
+      margin: 18px 0 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(139, 92, 246, 0.16);
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      color: #ddd6fe;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .utc-participant-sidebar .utc-party-label {
+      margin: 8px 0 5px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .utc-role-section {
+      background: #101620;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      scroll-margin-top: 150px;
+    }
+
+    .utc-role-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .utc-role-title {
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .utc-role-count {
+      background: rgba(139, 92, 246, 0.18);
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      color: #c4b5fd;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .utc-slot-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .utc-slot {
+      min-height: auto;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      background: rgba(27, 34, 48, 0.7);
+      border: 1px dashed var(--line);
+      border-radius: 15px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 8px;
+      overflow: visible;
+    }
+
+    .utc-slot-name {
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .utc-slot-empty {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .utc-slot-placeholder {
+      height: 34px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+
+    .admin-layout {
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-user-card {
+      background: #101620;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .admin-user-title {
+      font-weight: 1000;
+      font-size: 16px;
+    }
+
+    .admin-user-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .fight-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .fight-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .field-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: -4px;
+    }
+
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--text);
+      border-radius: 13px;
+      padding: 13px;
+      font-size: 15px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    select:focus,
+    textarea:focus {
+      border-color: var(--main2);
+    }
+
+    .fight-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .fight-post {
+      background: #101620;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .fight-post-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .fight-title {
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .fight-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .fight-desc {
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+
+    .fight-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .member-list {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .member-chip {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.28);
+      color: #86efac;
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .condition-toggle-row,
+    .condition-role-row,
+    .condition-category-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .condition-role-row {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .condition-category-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .condition-pick-area {
+      display: none;
+      gap: 10px;
+    }
+
+    .condition-pick-area.active {
+      display: grid;
+    }
+
+    .condition-btn {
+      background: var(--card2);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 12px 10px;
+      border-radius: 13px;
+      cursor: pointer;
+      font-weight: 900;
+      transition: 0.2s;
+      text-align: center;
+    }
+
+    .condition-btn.active {
+      background: rgba(139, 92, 246, 0.25);
+      border-color: var(--main2);
+      color: #ddd6fe;
+    }
+
+    .condition-row {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      gap: 10px;
+    }
+
+    .condition-preview {
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(167, 139, 250, 0.28);
+      color: #ddd6fe;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .condition-preview.ok {
+      background: rgba(34, 197, 94, 0.12);
+      border-color: rgba(34, 197, 94, 0.28);
+      color: #86efac;
+    }
+
+    .condition-preview.no {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.28);
+      color: #fca5a5;
+    }
+
+    .condition-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .condition-chip {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      background: #101620;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .condition-chip strong {
+      color: var(--text);
+    }
+
+    .condition-remove {
+      border: 0;
+      border-radius: 10px;
+      padding: 7px 9px;
+      background: var(--danger);
+      color: white;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .time-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .sort-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .sort-btn {
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--muted);
+      border-radius: 13px;
+      padding: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .sort-btn.active {
+      background: rgba(139, 92, 246, 0.25);
+      border-color: var(--main2);
+      color: #ddd6fe;
+    }
+
+    .time-badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 12px;
+      font-weight: 900;
+      margin-top: 6px;
+      border: 1px solid transparent;
+    }
+
+    .time-blue {
+      background: rgba(59, 130, 246, 0.14);
+      border-color: rgba(59, 130, 246, 0.35);
+      color: #93c5fd;
+    }
+
+    .time-green {
+      background: rgba(34, 197, 94, 0.14);
+      border-color: rgba(34, 197, 94, 0.35);
+      color: #86efac;
+    }
+
+    .time-yellow {
+      background: rgba(245, 158, 11, 0.14);
+      border-color: rgba(245, 158, 11, 0.35);
+      color: #fcd34d;
+    }
+
+    .time-red {
+      background: rgba(239, 68, 68, 0.14);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+    }
+
+    .content-filter-row {
+      margin-bottom: 12px;
+    }
+
+    .condition-slot-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .condition-slot-btn {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      font-weight: 900;
+      text-align: left;
+      transition: 0.2s;
+    }
+
+    .condition-slot-btn.available {
+      background: rgba(34, 197, 94, 0.13);
+      border-color: rgba(34, 197, 94, 0.35);
+      color: #86efac;
+    }
+
+    .condition-slot-btn.unavailable {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+
+    .condition-slot-btn.occupied {
+      background: rgba(59, 130, 246, 0.13);
+      border-color: rgba(59, 130, 246, 0.35);
+      color: #93c5fd;
+      cursor: not-allowed;
+    }
+
+    .condition-slot-btn.selected {
+      background: rgba(139, 92, 246, 0.24);
+      border-color: var(--main2);
+      color: #ddd6fe;
+    }
+
+    .slot-user {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+      font-weight: 800;
+    }
+
+    .edit-notice {
+      color: #fcd34d;
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 10px;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      background: rgba(245, 158, 11, 0.1);
+      border-radius: 13px;
+      display: none;
+    }
+
+    .edit-notice.active {
+      display: block;
+    }
+
+    .equipment-title-row,
+    .condition-option-row,
+    .condition-slot-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .equipment-icon {
+      width: 82px;
+      height: 82px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      padding: 4px;
+      flex: 0 0 auto;
+    }
+
+    .condition-select-option-icon {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      padding: 3px;
+      flex: 0 0 auto;
+    }
+
+    .condition-slot-icon {
+      width: 88px;
+      height: 88px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid currentColor;
+      padding: 4px;
+      flex: 0 0 auto;
+    }
+
+    .empty-fight {
+      color: var(--muted);
+      text-align: center;
+      padding: 36px 18px;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+      .layout,
+      .utc-main-head {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .utc-mass-center {
+      display: flex;
+      justify-content: center;
+      margin: 16px 0 18px;
+    }
+
+    .utc-mass-text {
+      text-align: center;
+      color: #ddd6fe;
+      font-size: clamp(22px, 4vw, 42px);
+      font-weight: 1000;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin: 8px 0 18px;
+    }
+
+    .utc-card {
+      min-height: calc(100vh - 120px);
+    }
+
+    .utc-desc {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .utc-mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .utc-mode-btn {
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--muted);
+      border-radius: 16px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .utc-mode-btn.active {
+      color: #ddd6fe;
+      border-color: var(--main2);
+      background: rgba(139, 92, 246, 0.25);
+    }
+
+    .utc-sheet-head {
+      background: rgba(27, 34, 48, 0.55);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .utc-sheet-title {
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .utc-sheet-sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .utc-content-layout {
+      display: grid;
+      grid-template-columns: 210px minmax(0, 1fr) 210px;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .utc-participant-sidebar {
+      position: sticky;
+      top: 12px;
+      background: rgba(16, 22, 32, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 10px;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .utc-sidebar-title {
+      font-size: 16px;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .utc-sidebar-sub {
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .utc-participant-panel {
+      display: grid;
+      gap: 7px;
+    }
+
+    .utc-sidebar-role {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 6px;
+      background: rgba(27, 34, 48, 0.55);
+    }
+
+    .utc-sidebar-role-title {
+      font-weight: 900;
+      margin-bottom: 4px;
+      color: #ddd6fe;
+      font-size: 12px;
+    }
+
+    .utc-sidebar-slot-btn {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 5px 6px;
+      margin-top: 4px;
+      cursor: pointer;
+      text-align: left;
+      font-weight: 900;
+      transition: 0.2s;
+      min-height: 0;
+    }
+
+    .utc-sidebar-slot-btn:hover {
+      border-color: var(--main2);
+      transform: translateY(-1px);
+    }
+
+    .utc-sidebar-slot-btn.joined {
+      background: rgba(139, 92, 246, 0.24);
+      border-color: var(--main2);
+      color: #ddd6fe;
+    }
+
+    .utc-sidebar-slot-btn.occupied {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.35);
+      color: #86efac;
+    }
+
+    .utc-sidebar-weapon {
+      display: block;
+      font-size: 11px;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .utc-sidebar-user {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .utc-slot.joined {
+      border-color: var(--main2);
+      background: rgba(139, 92, 246, 0.18);
+      box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.12);
+    }
+
+    .utc-slot.occupied {
+      border-color: rgba(34, 197, 94, 0.45);
+      background: rgba(34, 197, 94, 0.10);
+    }
+
+    .utc-slot-participant {
+      border: 1px solid var(--line);
+      background: rgba(8, 11, 18, 0.55);
+      border-radius: 12px;
+      padding: 9px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .utc-slot-participant.joined {
+      color: #ddd6fe;
+      border-color: var(--main2);
+      background: rgba(139, 92, 246, 0.18);
+    }
+
+    .utc-slot-participant.occupied {
+      color: #86efac;
+      border-color: rgba(34, 197, 94, 0.35);
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    .utc-role-nav-group {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .utc-party-nav-title {
+      padding: 9px 12px;
+      border-radius: 13px;
+      background: rgba(139, 92, 246, 0.16);
+      border: 1px solid rgba(167, 139, 250, 0.32);
+      color: #ddd6fe;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .utc-role-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+      position: sticky;
+      top: 10px;
+      z-index: 5;
+    }
+
+    .utc-role-nav-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .utc-role-nav-btn {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px 8px;
+      color: var(--text);
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.2s;
+      background: var(--card2);
+      font-size: 13px;
+    }
+
+    .utc-role-nav-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--main2);
+    }
+
+    .utc-status-empty {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.38);
+      color: #fca5a5;
+    }
+
+    .utc-status-partial {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: rgba(245, 158, 11, 0.38);
+      color: #fcd34d;
+    }
+
+    .utc-status-full {
+      background: rgba(34, 197, 94, 0.16);
+      border-color: rgba(34, 197, 94, 0.38);
+      color: #86efac;
+    }
+
+    .utc-mass-badge {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(34, 197, 94, 0.22));
+      border: 1px solid rgba(167, 139, 250, 0.55);
+      color: #f5f3ff;
+      border-radius: 24px;
+      padding: 24px 42px;
+      font-size: clamp(32px, 5vw, 64px);
+      font-weight: 1000;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      text-align: center;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+      min-width: min(720px, 100%);
+      white-space: nowrap;
+    }
+
+    .utc-slot-build {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 8px;
+      align-items: start;
+      width: 100%;
+      max-width: 100%;
+      overflow: visible;
+    }
+
+    .utc-gear-cell {
+      min-height: 0;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(8, 11, 18, 0.45);
+      padding: 6px;
+      display: grid;
+      align-content: start;
+      gap: 5px;
+      overflow: visible;
+    }
+
+    .utc-gear-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .utc-gear-options {
+      display: grid;
+      gap: 5px;
+      align-content: start;
+    }
+
+    .utc-gear-option {
+      position: relative;
+      display: grid;
+      justify-items: center;
+      align-items: center;
+      color: var(--text);
+      font-size: 11px;
+      line-height: 1.25;
+      text-align: center;
+      word-break: keep-all;
+      min-height: 0;
+    }
+
+    .utc-empty-item {
+      width: 54px;
+      height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: var(--muted);
+      cursor: help;
+    }
+
+    .utc-empty-icon {
+      font-size: 18px;
+      font-weight: 1000;
+      line-height: 1;
+    }
+
+    .utc-empty-text {
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .utc-gear-icon {
+      width: 54px;
+      height: 54px;
+      object-fit: contain;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      padding: 3px;
+      cursor: help;
+    }
+
+    .utc-gear-name {
+      display: none;
+    }
+
+    .utc-gear-option::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 9px);
+      transform: translateX(-50%);
+      background: #0b1020;
+      border: 1px solid var(--main2);
+      color: #f5f5f5;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.15s;
+      z-index: 20;
+    }
+
+    .utc-gear-option:hover::after {
+      opacity: 1;
+    }
+
+    .utc-sheet-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .utc-party-label {
+      margin: 18px 0 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(139, 92, 246, 0.16);
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      color: #ddd6fe;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .utc-participant-sidebar .utc-party-label {
+      margin: 8px 0 5px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .utc-role-section {
+      background: #101620;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      scroll-margin-top: 150px;
+    }
+
+    .utc-role-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .utc-role-title {
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .utc-role-count {
+      background: rgba(139, 92, 246, 0.18);
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      color: #c4b5fd;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .utc-slot-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .utc-slot {
+      min-height: auto;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      background: rgba(27, 34, 48, 0.7);
+      border: 1px dashed var(--line);
+      border-radius: 15px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 8px;
+      overflow: visible;
+    }
+
+    .utc-slot-name {
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .utc-slot-empty {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .utc-slot-placeholder {
+      height: 34px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+
+    .admin-layout {
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-user-card {
+      background: #101620;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .admin-user-title {
+      font-weight: 1000;
+      font-size: 16px;
+    }
+
+    .admin-user-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .fight-layout {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .card {
+        height: auto;
+      }
+
+      .category-buttons {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 10px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .category-buttons {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .right-card-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .badge-wrap {
+        justify-content: flex-start;
+      }
+
+      .top-tabs,
+      .utc-mode-tabs,
+      .utc-role-nav,
+      .utc-slot-grid,
+      .login-buttons,
+      .nickname-row,
+      .condition-toggle-row,
+      .condition-role-row,
+      .condition-category-row,
+      .condition-row,
+      .time-row,
+      .sort-tabs {
+        grid-template-columns: 1fr;
+      }
+
+      .utc-slot-build {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .utc-empty-item {
+      width: 54px;
+      height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: var(--muted);
+      cursor: help;
+    }
+
+    .utc-empty-icon {
+      font-size: 18px;
+      font-weight: 1000;
+      line-height: 1;
+    }
+
+    .utc-empty-text {
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .utc-gear-icon {
+        width: 58px;
+        height: 58px;
+      }
+    }
+  </style>
+</head>
+
+<body class="access-locked">
+  <div id="accessGate" class="access-gate">
+    <h2>로그인이 필요합니다</h2>
+    <p id="accessGateMessage">구글 로그인 후 승인된 사용자만 이용할 수 있습니다.</p>
+    <button class="btn" onclick="login()">구글 로그인</button>
+  </div>
+
+  <div class="top-tabs">
+    <button id="utcTabBtn" class="tab-btn-main active" onclick="switchTab('utc')">12UTC</button>
+    <button id="fightTabBtn" class="tab-btn-main" onclick="switchTab('fight')">컨텐츠 모집</button>
+    <button id="masteryTabBtn" class="tab-btn-main" onclick="switchTab('mastery')">나의 숙련도</button>
+    <button id="adminTabBtn" class="tab-btn-main" onclick="switchTab('admin')" style="display:none;">관리자</button>
+  </div>
+
+  <main id="utcTab" class="container tab-panel active">
+    <section class="card utc-card">
+      <div class="utc-mass-text" id="utcMassBadge">12UTC</div>
+
+      <div class="utc-mode-tabs">
+        <button id="utcClapBtn" class="utc-mode-btn active" onclick="selectUtcMode('clap')">클랩</button>
+        <button id="utcBrawlBtn" class="utc-mode-btn" onclick="selectUtcMode('brawl')">브롤</button>
+        <button id="utcKiteBtn" class="utc-mode-btn" onclick="selectUtcMode('kite')">카이팅</button>
+      </div>
+
+      <div class="utc-sheet-head">
+        <div>
+          <div class="utc-sheet-title" id="utcSheetTitle">클랩 시트 모집</div>
+          <div class="utc-sheet-sub">역할 배너를 누르면 해당 위치로 바로 이동합니다.</div>
+        </div>
+      </div>
+
+      <div class="utc-content-layout">
+        <aside class="utc-participant-sidebar">
+          <div class="utc-sidebar-title">1파티 참가 현황</div>
+          <div class="utc-sidebar-sub">무기를 클릭하면 참가합니다. 다른 무기를 누르면 기존 선택은 자동 해제됩니다.</div>
+          <div id="utcParticipantPanelParty1" class="utc-participant-panel"></div>
+        </aside>
+
+        <section class="utc-sheet-main">
+          <div id="utcRoleNav" class="utc-role-nav"></div>
+          <div id="utcSheetGrid" class="utc-sheet-grid"></div>
+        </section>
+
+        <aside class="utc-participant-sidebar">
+          <div class="utc-sidebar-title">2파티 참가 현황</div>
+          <div class="utc-sidebar-sub">무기를 클릭하면 참가합니다. 다른 무기를 누르면 기존 선택은 자동 해제됩니다.</div>
+          <div id="utcParticipantPanelParty2" class="utc-participant-panel"></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <main id="masteryTab" class="container tab-panel">
+    <div class="layout">
+      <aside class="card left-card">
+        <div class="login-box">
+          <div id="loginStatus" class="login-status">로그인이 필요합니다.</div>
+          <div class="login-buttons">
+            <button class="btn" onclick="login()">구글 로그인</button>
+            <button class="btn btn-secondary" onclick="logout()">로그아웃</button>
+          </div>
+
+          <div class="nickname-box">
+            <div class="nickname-label">닉네임</div>
+            <div class="nickname-row">
+              <input id="nicknameInput" type="text" maxlength="16" placeholder="닉네임 입력" disabled />
+              <button id="nicknameSaveBtn" class="btn" onclick="saveNickname()" disabled>설정</button>
+            </div>
+            <div id="nicknameHelp" class="nickname-help">로그인 후 닉네임을 한 번만 설정할 수 있습니다.</div>
+          </div>
+
+          <div id="saveStatus" class="save-status"></div>
+        </div>
+
+        <h2>전체 진행도</h2>
+
+        <div class="summary">
+          <div class="summary-box">
+            <span>평균 숙련도</span>
+            <strong id="avgLevel">0</strong>
+          </div>
+
+          <div class="summary-box">
+            <span>100레벨 완료 장비</span>
+            <strong id="completed100Items">0</strong>
+          </div>
+
+          <div class="summary-box">
+            <span>120레벨 완료 장비</span>
+            <strong id="completed120Items">0</strong>
+          </div>
+        </div>
+
+        <div class="progress-group">
+          <div>
+            <div class="progress-info">
+              <span>100레벨 완료 진척도</span>
+              <span id="overall100Percent">0%</span>
+            </div>
+            <div class="bar">
+              <div class="bar-fill" id="overall100Bar"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="progress-info">
+              <span>120레벨 완료 진척도</span>
+              <span id="overall120Percent">0%</span>
+            </div>
+            <div class="bar">
+              <div class="bar-fill" id="overall120Bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-area">
+          <div class="category-section">
+            <div class="category-section-title">무기</div>
+            <div id="weaponButtons" class="category-buttons"></div>
+          </div>
+
+          <div class="category-section">
+            <div class="category-section-title">보조무기</div>
+            <div id="offhandButtons" class="category-buttons"></div>
+          </div>
+
+          <div class="category-section">
+            <div class="category-section-title">방어구</div>
+            <div id="armorButtons" class="category-buttons"></div>
+          </div>
+        </div>
+
+        <button class="btn-danger" onclick="clearAll()">전체 삭제</button>
+      </aside>
+
+      <section class="card right-card">
+        <div class="right-card-head">
+          <h2 id="selectedCategoryTitle">검</h2>
+
+          <div class="badge-wrap">
+            <div class="badge" id="category100Badge">100레벨 0/8 완료</div>
+            <div class="badge" id="category120Badge">120레벨 0/8 완료</div>
+          </div>
+        </div>
+
+        <div class="progress-group">
+          <div>
+            <div class="progress-info">
+              <span>100레벨 기준 진행도</span>
+              <span id="category100Percent">0%</span>
+            </div>
+            <div class="bar">
+              <div class="bar-fill" id="category100Bar"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="progress-info">
+              <span>120레벨 기준 진행도</span>
+              <span id="category120Percent">0%</span>
+            </div>
+            <div class="bar">
+              <div class="bar-fill" id="category120Bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="equipmentInputGrid" class="equipment-input-grid"></div>
+      </section>
+    </div>
+  </main>
+
+  <main id="adminTab" class="container tab-panel">
+    <section class="card">
+      <div class="right-card-head">
+        <h2>관리자 모드</h2>
+        <div class="badge" id="approvalCount">0명 대기중</div>
+      </div>
+
+      <div class="admin-layout">
+        <div class="empty-fight">
+          승인 대기 유저가 있으면 이곳에 표시됩니다.
+        </div>
+        <div id="approvalList" class="admin-layout"></div>
+      </div>
+    </section>
+  </main>
+
+  <main id="fightTab" class="container tab-panel">
+    <div class="fight-layout">
+      <section class="card">
+        <h2>컨텐츠 모집하기</h2>
+
+        <div class="fight-form">
+          <div class="field-label">컨텐츠</div>
+          <select id="fightContent">
+            <option value="스태틱">스태틱</option>
+            <option value="스태틱다이브">스태틱다이브</option>
+            <option value="그룹야영지">그룹야영지</option>
+            <option value="아웃포">아웃포</option>
+            <option value="필드로밍">필드로밍</option>
+            <option value="아발로드">아발로드</option>
+            <option value="심연">심연</option>
+            <option value="아레나">아레나</option>
+            <option value="기타">기타</option>
+          </select>
+
+          <div class="field-label">제목</div>
+          <input id="fightTitleInput" type="text" maxlength="40" placeholder="예: 스태틱 파이트 가실분" />
+
+          <div class="field-label">모집 인원</div>
+          <input id="fightMaxMembers" type="number" inputmode="numeric" min="2" max="20" value="7" />
+
+          <div class="field-label">출발 시간</div>
+          <div class="time-row">
+            <select id="fightStartHour"></select>
+            <select id="fightStartMinute"></select>
+          </div>
+
+          <div class="field-label">조건</div>
+
+          <div class="condition-toggle-row">
+            <button id="conditionNoneBtn" class="condition-btn active" type="button" onclick="setConditionMode(false)">조건 없음</button>
+            <button id="conditionYesBtn" class="condition-btn" type="button" onclick="setConditionMode(true)">조건 있음</button>
+          </div>
+
+          <div id="conditionPickArea" class="condition-pick-area">
+            <div class="field-label">모집 역할</div>
+            <div class="condition-role-row">
+              <button id="roleTankBtn" class="condition-btn" type="button" onclick="selectConditionRole('탱커')">탱커</button>
+              <button id="roleHealerBtn" class="condition-btn" type="button" onclick="selectConditionRole('힐러')">힐러</button>
+              <button id="roleDealerBtn" class="condition-btn" type="button" onclick="selectConditionRole('딜러')">딜러</button>
+            </div>
+
+            <div class="field-label">무기 계열</div>
+            <div id="conditionCategoryButtons" class="condition-category-row"></div>
+
+            <div class="field-label">무기 / 필요 레벨</div>
+            <div class="condition-row">
+              <select id="fightRequiredEquipment" onchange="updateConditionPreview(); updateConditionEquipmentPreview();"></select>
+              <input
+                id="fightRequiredLevel"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                max="120"
+                value="100"
+                oninput="updateConditionPreview()"
+                placeholder="0 ~ 120"
+              />
+            </div>
+
+            <div id="conditionEquipmentPreview" class="condition-preview">
+              무기를 선택하면 아이콘이 표시됩니다.
+            </div>
+
+            <button class="btn btn-secondary" type="button" onclick="addRecruitCondition()">조건 추가</button>
+            <div id="conditionList" class="condition-list"></div>
+          </div>
+
+          <div id="conditionPreview" class="condition-preview">
+            조건 없음: 누구나 참가 가능
+          </div>
+
+          <div class="field-label">설명</div>
+          <textarea id="fightDescription" maxlength="300" placeholder="예: 디스코드 필수, 초보 가능, 힐러/탱커 우대"></textarea>
+
+          <div id="editNotice" class="edit-notice">모집글 수정 중입니다. 수정 완료를 누르면 기존 모집글이 업데이트됩니다.</div>
+          <button id="fightSubmitBtn" class="btn" onclick="createFightPost()">모집글 올리기</button>
+          <button id="fightCancelEditBtn" class="btn btn-secondary" style="display:none;" onclick="cancelFightEdit()">수정 취소</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="right-card-head">
+          <h2>실시간 컨텐츠 모집 목록</h2>
+          <div class="badge" id="fightPostCount">0개 모집중</div>
+        </div>
+
+        <div class="content-filter-row">
+          <select id="contentFilterSelect" onchange="setContentFilter(this.value)">
+            <option value="전체">전체 컨텐츠</option>
+            <option value="스태틱">스태틱</option>
+            <option value="스태틱다이브">스태틱다이브</option>
+            <option value="그룹야영지">그룹야영지</option>
+            <option value="아웃포">아웃포</option>
+            <option value="필드로밍">필드로밍</option>
+            <option value="아발로드">아발로드</option>
+            <option value="심연">심연</option>
+            <option value="아레나">아레나</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+
+        <div class="sort-tabs">
+          <button id="sortRecentBtn" class="sort-btn active" onclick="setFightSortMode('recent')">최근등록순</button>
+          <button id="sortSoonBtn" class="sort-btn" onclick="setFightSortMode('soon')">출발임박순</button>
+        </div>
+
+        <div id="fightList" class="fight-list">
+          <div class="empty-fight">아직 올라온 컨텐츠 모집글이 없습니다.</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      deleteDoc,
+      collection,
+      addDoc,
+      updateDoc,
+      arrayUnion,
+      arrayRemove,
+      onSnapshot,
+      query,
+      orderBy,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCY7SQKZHC0S9SY3Z8ApP5meQdB0UFrsEQ",
+      authDomain: "build-792eb.firebaseapp.com",
+      projectId: "build-792eb",
+      storageBucket: "build-792eb.firebasestorage.app",
+      messagingSenderId: "898999621915",
+      appId: "1:898999621915:web:3f2a6f09e048039ba71bbe",
+      measurementId: "G-WT2H65TKKM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    getAnalytics(app);
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    const weaponCategories = [
+      "검", "도끼", "메이스", "해머", "전투장갑", "크로스보우", "활", "대거", "창",
+      "쿼터스태프", "셰이프시프터", "네이처스태프", "파이어스태프", "홀리스태프",
+      "아케인스태프", "프로스트스태프", "커스드스태프"
+    ];
+
+    const offhandCategories = ["방패", "횃불", "주문서적"];
+
+    const armorCategories = [
+      "플레이트 부츠", "플레이트 아머", "플레이트 헬멧",
+      "피혁신발", "피혁재킷", "피혁후드",
+      "직물샌들", "직물로브", "직물두건"
+    ];
+
+    const equipmentData = {
+      "검": ["브로드소드", "클레이모어", "듀얼소드", "클라렌트", "조각용소드", "갤러틴페어", "킹메이커", "인피니티블레이드"],
+      "도끼": ["배틀액스", "그레이트액스", "할버드", "캐리온콜러", "인페르날사이드", "베어포", "렐름브레이커", "크리스탈리퍼"],
+      "메이스": ["메이스", "헤비메이스", "모닝스타", "베드록메이스", "인큐버스메이스", "캄란메이스", "오스키퍼", "드레드스톰모나크"],
+      "해머": ["해머", "폴해머", "그레이트해머", "툼해머", "대장간망치", "그로브키퍼", "핸드오브저스티스", "트루볼트해머"],
+      "전투장갑": ["난투장갑", "전투브레이서", "가시건틀릿", "곰주먹", "지옥불장갑", "까마귀장갑", "아발론의철권", "포스펄스브레이서"],
+      "크로스보우": ["크로스보우", "헤비크로스보우", "경량크로스보우", "위핑리피터", "볼트캐스터", "시지보우", "에너지셰이퍼", "아크라이트블래스터"],
+      "활": ["활", "워보우", "롱보우", "위스퍼링보우", "웨일링보우", "바돈의활", "미스트피어서", "스카이스트라이더"],
+      "대거": ["대거", "대거페어", "클로", "블러드레터", "데몬팽", "데스기버", "브라이들드퓨리", "트윈슬레이어즈"],
+      "창": ["창", "파이크", "글레이브", "헤론스피어", "스피릿헌터", "트리니티스피어", "데이브레이커", "리프트글레이브"],
+      "쿼터스태프": ["쿼터스태프", "아이언클래드스태프", "더블블레이디드스태프", "블랙몽크스태프", "소울사이드", "균형의스태프", "그레일시커", "팬텀트윈블레이드"],
+      "셰이프시프터": ["프라울링스태프", "루트바운드스태프", "프라이멀스태프", "블러드문스태프", "헬스폰스태프", "어스룬스태프", "라이트콜러", "스틸게이즈스태프"],
+      "네이처스태프": ["네이처스태프", "그레이트네이처스태프", "와일드스태프", "드루이드스태프", "블라이트스태프", "램펀트스태프", "아이언루트스태프", "포지바크스태프"],
+      "파이어스태프": ["파이어스태프", "그레이트파이어스태프", "인페르날스태프", "와일드파이어스태프", "브림스톤스태프", "블레이징스태프", "던송", "플레임워커스태프"],
+      "홀리스태프": ["홀리스태프", "그레이트홀리스태프", "디바인스태프", "라이프터치스태프", "폴른스태프", "리뎀션스태프", "할로우폴", "이그졸디드스태프"],
+      "아케인스태프": ["아케인스태프", "그레이트아케인스태프", "에니그마틱스태프", "위치워크스태프", "오컬트그림자스태프", "말레볼렌트로커스", "이븐송스태프", "아스트랄스태프"],
+      "프로스트스태프": ["프로스트스태프", "그레이트프로스트스태프", "글래셜스태프", "호어프로스트스태프", "아이시클스태프", "퍼마프로스트프리즘", "칠하울", "아크틱스태프"],
+      "커스드스태프": ["커스드스태프", "그레이트커스드스태프", "데모닉스태프", "라이프커스스태프", "커스드스컬", "뎀네이션스태프", "섀도우콜러", "로트콜러"],
+      "방패": ["방패", "석관", "케이티프방패", "페이스브레이커", "아스트랄아이기스", "언브레이커블와드"],
+      "횃불": ["횃불", "미스트콜러", "음흉한지팡이", "크립트캔들", "성스러운셉터", "블루플레임토치"],
+      "주문서적": ["서적", "비밀의눈", "뮤삭", "탭루트", "천상의향로", "타임록드그리모어"],
+      "플레이트 부츠": ["병사부츠", "기사부츠", "가디언부츠", "왕실부츠", "그레이브가드부츠", "데몬부츠", "심판관부츠", "더스크위버부츠", "용기의부츠"],
+      "플레이트 아머": ["병사아머", "기사아머", "가디언아머", "왕실아머", "그레이브가드아머", "데몬아머", "심판관아머", "더스크위버아머", "용기의아머"],
+      "플레이트 헬멧": ["병사헬멧", "기사헬멧", "가디언헬멧", "왕실헬멧", "그레이브가드헬멧", "데몬헬멧", "심판관헬멧", "더스크위버헬멧", "용기의헬멧"],
+      "피혁신발": ["용병신발", "헌터신발", "암살자신발", "왕실신발", "추적자신발", "무법자신발", "망령신발", "끈기의신발", "미스트워커신발"],
+      "피혁재킷": ["용병재킷", "헌터재킷", "암살자재킷", "왕실재킷", "추적자재킷", "무법자재킷", "망령재킷", "끈기의재킷", "미스트워커재킷"],
+      "피혁후드": ["용병후드", "헌터후드", "암살자후드", "왕실후드", "추적자후드", "무법자후드", "망령후드", "끈기의후드", "미스트워커후드"],
+      "직물샌들": ["학자샌들", "성직자샌들", "메이지샌들", "왕실샌들", "드루이드샌들", "악령샌들", "광신도샌들", "순수의샌들", "요정비늘샌들"],
+      "직물로브": ["학자로브", "성직자로브", "메이지로브", "왕실로브", "드루이드로브", "악령로브", "광신도로브", "순수의로브", "요정비늘로브"],
+      "직물두건": ["학자두건", "성직자두건", "메이지두건", "왕실두건", "드루이드두건", "악령두건", "광신도두건", "순수의두건", "요정비늘모자"]
+    };
+
+
+    function getEquipmentImage(equipmentName) {
+      return `image/${encodeURIComponent(equipmentName)}.webp`;
+    }
+
+    function getEquipmentIconHtml(equipmentName, className = "equipment-icon") {
+      return `
+        <img
+          class="${className}"
+          src="${getEquipmentImage(equipmentName)}"
+          alt="${equipmentName}"
+          loading="lazy"
+          onerror="this.style.display='none'"
+        />
+      `;
+    }
+
+    const tankOnlyWeapons = {
+      "쿼터스태프": ["아이언클래드스태프", "블랙몽크", "소울사이드", "균형의스태프", "그레일시커"],
+      "프로스트스태프": ["아이시클스태프"],
+      "셰이프시프터": ["프라이멀스태프", "어스룬스태프", "루트바운드스태프"]
+    };
+
+    const roleCategoryMap = {
+      "탱커": ["메이스", "해머", "쿼터스태프", "프로스트스태프", "셰이프시프터"],
+      "힐러": ["홀리스태프", "네이처스태프"],
+      "딜러": weaponCategories.filter(category => !["메이스", "해머", "홀리스태프", "네이처스태프"].includes(category))
+    };
+
+    function getConditionEquipmentList(role, category) {
+      const allWeapons = equipmentData[category] || [];
+
+      if (role === "탱커") {
+        if (tankOnlyWeapons[category]) {
+          return allWeapons.filter(equipment => tankOnlyWeapons[category].includes(equipment));
+        }
+
+        return allWeapons;
+      }
+
+      if (role === "딜러" && tankOnlyWeapons[category]) {
+        return allWeapons.filter(equipment => !tankOnlyWeapons[category].includes(equipment));
+      }
+
+      return allWeapons;
+    }
+
+    let conditionEnabled = false;
+    let selectedConditionRole = "";
+    let selectedConditionCategory = "";
+    let recruitConditions = [];
+
+    let selectedCategory = weaponCategories[0];
+    let masteryData = {};
+    let currentUser = null;
+    let currentNickname = "";
+    let isAllowedUser = false;
+    let isAdminUser = false;
+    let approvalUnsubscribe = null;
+    let isLoaded = false;
+    let saveTimer = null;
+    let fightUnsubscribe = null;
+    let fightPostsCache = [];
+    let fightSortMode = "recent";
+    let contentFilter = "전체";
+    let countdownTimer = null;
+    let editingFightPostId = null;
+
+
+
+    const utcModes = {
+      clap: "클랩",
+      brawl: "브롤",
+      kite: "카이팅"
+    };
+
+    const utcSheetRoles = [
+      { key: "caller", role: "콜러", count: 1 },
+      { key: "offtank", role: "오펜탱", count: 1 },
+      { key: "deftank", role: "디펜탱", count: 4 },
+      { key: "support", role: "서폿", count: 4 },
+      { key: "heal", role: "힐", count: 5 },
+      { key: "debuff", role: "디버프", count: 4 },
+      { key: "dps", role: "DPS", count: 8 }
+    ];
+
+    const utcPartyRoles = [
+      { key: "caller", role: "콜러" },
+      { key: "offtank", role: "오펜탱" },
+      { key: "deftank", role: "디펜탱" },
+      { key: "support", role: "서폿" },
+      { key: "heal", role: "힐" },
+      { key: "debuff", role: "디버프" },
+      { key: "dps", role: "DPS" }
+    ];
+
+    const utcBuildLabels = ["무기", "보조무기", "머리", "갑옷", "신발", "망토", "음식", "포션"];
+
+    const utcBuildTemplates = {
+      clap: {
+        offtank: [
+          {
+            weapon: ["인큐버스메이스"],
+            offhand: ["미스트콜러"],
+            helmet: ["암살자후드"],
+            armor: ["데몬아머"],
+            shoes: ["그레이브가드부츠", "왕실신발"],
+            cape: ["lymhurst망토"],
+            food: ["소고기소고기샌드위치"],
+            potion: ["거대화포션"]
+          }
+        ],
+        deftank: [
+          {
+            weapon: ["헤비메이스"],
+            offhand: ["없음"],
+            helmet: ["무법자후드"],
+            armor: ["가디언아머"],
+            shoes: ["텔포신발", "왕실신발"],
+            cape: ["밀수꾼망토"],
+            food: ["아발로니안오믈렛"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["해머"],
+            offhand: ["케이티프방패"],
+            helmet: ["심판관헬멧"],
+            armor: ["더스크위버아머"],
+            shoes: ["텔포신발", "왕실신발"],
+            cape: ["밀수꾼망토"],
+            food: ["아발로니안오믈렛", "소고기샌드위치"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["그레이트아케인스태프"],
+            offhand: ["없음"],
+            helmet: ["암살자후드"],
+            armor: ["기사아머"],
+            shoes: ["텔포신발", "왕실신발"],
+            cape: ["밀수꾼망토"],
+            food: ["아발로니안오믈렛"],
+            potion: ["거대화포션"]
+          },
+          {
+            party: 2,
+            weapon: ["균형의스태프"],
+            offhand: ["없음"],
+            helmet: ["무법자후드"],
+            armor: ["더스크위버아머"],
+            shoes: ["요정비늘샌들", "헌터신발"],
+            cape: ["밀수꾼망토"],
+            food: ["아발로니안오믈렛", "소고기샌드위치"],
+            potion: ["거대화포션"]
+          }
+        ],
+        support: [
+          {
+            weapon: ["로트콜러"],
+            offhand: ["탭루트"],
+            helmet: ["암살자후드"],
+            armor: ["데몬아머"],
+            shoes: ["추적자신발", "왕실신발"],
+            cape: ["lymhurst망토", "밀수꾼망토"],
+            food: ["아발로니안오믈렛", "오믈렛"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["오스키퍼"],
+            offhand: ["없음"],
+            helmet: ["암살자후드"],
+            armor: ["데몬아머"],
+            shoes: ["가디언부츠", "그레이브가드부츠"],
+            cape: ["밀수꾼망토", "lymhurst망토"],
+            food: ["아발로니안오믈렛"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["오스키퍼"],
+            offhand: ["없음"],
+            helmet: ["암살자후드"],
+            armor: ["데몬아머"],
+            shoes: ["가디언부츠", "그레이브가드부츠"],
+            cape: ["밀수꾼망토", "lymhurst망토"],
+            food: ["아발로니안오믈렛"],
+            potion: ["거대화포션"]
+          },
+          {
+            party: 2,
+            weapon: ["에니그마틱스태프"],
+            offhand: ["없음"],
+            helmet: ["암살자후드"],
+            armor: ["심판관아머"],
+            shoes: ["추적자신발"],
+            cape: ["lymhurst망토", "밀수꾼망토"],
+            food: ["아발로니안오믈렛"],
+            potion: ["거대화포션"]
+          }
+        ],
+        heal: [
+          {
+            weapon: ["할로우폴"],
+            offhand: ["천상의향로"],
+            helmet: ["왕실두건"],
+            armor: ["심판관아머"],
+            shoes: ["왕실신발", "추적자신발"],
+            cape: ["lymhurst망토"],
+            food: ["아발로니안오믈렛"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["리뎀션스태프"],
+            offhand: ["없음"],
+            helmet: ["성직자두건"],
+            armor: ["가죽재킷"],
+            shoes: ["텔포신발"],
+            cape: ["lymhurst망토"],
+            food: ["더스크홀게오믈렛"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["할로우폴"],
+            offhand: ["석관"],
+            helmet: ["성직자두건"],
+            armor: ["가죽재킷"],
+            shoes: ["텔포신발"],
+            cape: ["lymhurst망토"],
+            food: ["더스크홀게오믈렛"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["블라이트스태프"],
+            offhand: ["없음"],
+            helmet: ["암살자후드"],
+            armor: ["성직자로브", "미스트워커재킷"],
+            shoes: ["추적자신발", "왕실신발"],
+            cape: ["lymhurst망토"],
+            food: ["아발로니안오믈렛"],
+            potion: ["거대화포션"]
+          },
+          {
+            party: 2,
+            weapon: ["블라이트스태프"],
+            offhand: ["없음"],
+            helmet: ["암살자후드"],
+            armor: ["성직자로브", "미스트워커재킷"],
+            shoes: ["추적자신발", "왕실신발"],
+            cape: ["lymhurst망토"],
+            food: ["아발로니안오믈렛"],
+            potion: ["거대화포션"]
+          }
+        ],
+        debuff: [
+          {
+            weapon: ["라이프커스스태프"],
+            offhand: ["미스트콜러"],
+            helmet: ["암살자후드"],
+            armor: ["심판관아머"],
+            shoes: ["그레이브가드부츠", "왕실신발"],
+            cape: ["lymhurst망토"],
+            food: ["아발로니안오믈렛"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["섀도우콜러"],
+            offhand: ["미스트콜러"],
+            helmet: ["암살자후드"],
+            armor: ["데몬아머"],
+            shoes: ["추적자신발", "왕실신발"],
+            cape: ["lymhurst망토", "밀수꾼망토"],
+            food: ["아발로니안오믈렛", "오믈렛"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["렐름브레이커"],
+            offhand: ["없음"],
+            helmet: ["심판관헬멧"],
+            armor: ["무법자재킷", "미스트워커재킷"],
+            shoes: ["용기의부츠", "그레이브가드부츠"],
+            cape: ["lymhurst망토"],
+            food: ["장어스튜"],
+            potion: ["거대화포션"]
+          },
+          {
+            party: 2,
+            weapon: ["뎀네이션스태프"],
+            offhand: ["없음"],
+            helmet: ["암살자후드"],
+            armor: ["심판관아머"],
+            shoes: ["그레이브가드부츠", "왕실신발"],
+            cape: ["lymhurst망토"],
+            food: ["아발로니안오믈렛"],
+            potion: ["거대화포션"]
+          }
+        ],
+        dps: [
+          {
+            weapon: ["가시건틀릿"],
+            offhand: ["없음"],
+            helmet: ["성직자두건", "심판관헬멧"],
+            armor: ["끈기의재킷", "무법자재킷"],
+            shoes: ["추적자신발", "그레이브가드부츠"],
+            cape: ["lymhurst망토"],
+            food: ["소고기스튜"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["킹메이커"],
+            offhand: ["없음"],
+            helmet: ["성직자두건"],
+            armor: ["무법자재킷", "미스트워커재킷"],
+            shoes: ["용기의부츠", "추적자신발"],
+            cape: ["lymhurst망토"],
+            food: ["소고기스튜"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["전투브레이서"],
+            offhand: ["없음"],
+            helmet: ["성직자두건"],
+            armor: ["무법자재킷", "헌터재킷"],
+            shoes: ["추적자신발"],
+            cape: ["lymhurst망토"],
+            food: ["소고기스튜"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["데몬팽"],
+            offhand: ["페이스브레이커"],
+            helmet: ["성직자두건"],
+            armor: ["무법자재킷", "가디언아머"],
+            shoes: ["추적자신발", "용기의부츠"],
+            cape: ["lymhurst망토"],
+            food: ["없음"],
+            potion: ["거대화포션"]
+          },
+          {
+            weapon: ["롱보우"],
+            offhand: ["없음"],
+            helmet: ["성직자두건"],
+            armor: ["끈기의재킷"],
+            shoes: ["그레이브가드부츠", "추적자신발"],
+            cape: ["lymhurst망토"],
+            food: ["소고기스튜"],
+            potion: ["거대화포션"]
+          },
+          {
+            party: 2,
+            weapon: ["블러드레터"],
+            offhand: ["페이스브레이커"],
+            helmet: ["성직자두건"],
+            armor: ["무법자재킷"],
+            shoes: ["추적자신발"],
+            cape: ["lymhurst망토"],
+            food: ["소고기스튜"],
+            potion: ["거대화포션"]
+          },
+          {
+            party: 2,
+            weapon: ["곰주먹"],
+            offhand: ["없음"],
+            helmet: ["암살자후드"],
+            armor: ["병사아머"],
+            shoes: ["추적자신발"],
+            cape: ["lymhurst망토"],
+            food: ["로스트퓨어미스트스내퍼구이", "소고기스튜"],
+            potion: ["거대화포션"]
+          },
+          {
+            party: 2,
+            weapon: ["인피니티블레이드"],
+            offhand: ["페이스브레이커"],
+            helmet: ["성직자두건"],
+            armor: ["무법자재킷"],
+            shoes: ["마나런"],
+            cape: ["lymhurst망토"],
+            food: ["소고기스튜", "로스트퓨어미스트스내퍼구이"],
+            potion: ["거대화포션"]
+          }
+        ]
+      },
+      brawl: {},
+      kite: {}
+    };
+
+    let selectedUtcMode = "clap";
+    let utcParticipants = {};
+    let utcUnsubscribe = null;
+
+    function getUtcRoleFilledCount(roleKey) {
+      // 초안 단계에서는 실제 참가 기능 전이라 0명으로 표시합니다.
+      return 0;
+    }
+
+    function getUtcStatusClass(filled, max) {
+      if (filled <= 0) return "utc-status-empty";
+      if (filled < max) return "utc-status-partial";
+      return "utc-status-full";
+    }
+
+    window.scrollToUtcRole = function (roleKey) {
+      const target = document.getElementById(roleKey.startsWith("utc-role-") ? roleKey : `utc-role-${roleKey}`);
+      if (!target) return;
+
+      const stickyOffset = 150;
+      const targetTop = target.getBoundingClientRect().top + window.pageYOffset - stickyOffset;
+
+      window.scrollTo({
+        top: Math.max(targetTop, 0),
+        behavior: "smooth"
+      });
+    };
+
+    window.selectUtcMode = function (mode) {
+      selectedUtcMode = mode;
+
+      document.getElementById("utcClapBtn").classList.toggle("active", mode === "clap");
+      document.getElementById("utcBrawlBtn").classList.toggle("active", mode === "brawl");
+      document.getElementById("utcKiteBtn").classList.toggle("active", mode === "kite");
+
+      renderUtcSheet();
+    };
+
+    function renderUtcRoleNav() {
+      const nav = document.getElementById("utcRoleNav");
+      if (!nav) return;
+
+      const templates = utcBuildTemplates[selectedUtcMode] || {};
+
+      function getPartyRoleMax(roleKey, partyNumber) {
+        const builds = templates[roleKey] || [];
+        return builds.filter(build => {
+          const buildParty = build.party === 2 ? 2 : 1;
+          return buildParty === partyNumber;
+        }).length;
+      }
+
+      function getPartyRoleFilled(role, partyNumber) {
+        let filled = 0;
+
+        Object.keys(utcParticipants).forEach(slotId => {
+          const participant = utcParticipants[slotId];
+          if (
+            participant &&
+            participant.mode === selectedUtcMode &&
+            participant.role === role &&
+            slotId.includes(`party${partyNumber}_`)
+          ) {
+            filled += 1;
+          }
+        });
+
+        return filled;
+      }
+
+      function renderPartyNav(partyNumber) {
+        const buttons = utcPartyRoles.map(group => {
+          const maxCount = getPartyRoleMax(group.key, partyNumber);
+          if (!maxCount) return "";
+
+          const filled = getPartyRoleFilled(group.role, partyNumber);
+          const statusClass = getUtcStatusClass(filled, maxCount);
+          const targetId = group.key + (partyNumber === 1 ? "" : "-party2");
+
+          return `
+            <button class="utc-role-nav-btn ${statusClass}" onclick="scrollToUtcRole('${targetId}')">
+              ${group.role} ${filled}/${maxCount}
+            </button>
+          `;
+        }).filter(Boolean).join("");
+
+        return `
+          <div class="utc-role-nav-group">
+            <div class="utc-party-nav-title">${partyNumber}파티 역할 이동</div>
+            <div class="utc-role-nav-buttons">
+              ${buttons || `<div class="empty-fight">슬롯 없음</div>`}
+            </div>
+          </div>
+        `;
+      }
+
+      nav.innerHTML = renderPartyNav(1) + renderPartyNav(2);
+    }
+
+    function getUtcMassStatusText() {
+      const now = new Date();
+      const minutesNow = now.getHours() * 60 + now.getMinutes();
+      const showStart = 18 * 60;
+      const massUp = 21 * 60 + 20;
+      const reset = 23 * 60;
+
+      if (minutesNow < showStart || minutesNow >= reset) {
+        return "12UTC";
+      }
+
+      if (minutesNow >= massUp) {
+        return "MASS UP";
+      }
+
+      const left = massUp - minutesNow;
+      const hours = Math.floor(left / 60);
+      const minutes = left % 60;
+
+      if (hours > 0 && minutes > 0) return `MASS UP ${hours}시간 ${minutes}분 전`;
+      if (hours > 0) return `MASS UP ${hours}시간 전`;
+      return `MASS UP ${minutes}분 전`;
+    }
+
+    function updateUtcMassBadge() {
+      const badge = document.getElementById("utcMassBadge");
+      if (!badge) return;
+      badge.textContent = getUtcMassStatusText();
+    }
+
+    function renderUtcBuild(build) {
+      if (!build) {
+        return `
+          <div class="utc-slot-placeholder"></div>
+          <div class="utc-slot-empty">장비 미지정</div>
+        `;
+      }
+
+      const parts = [
+        build.weapon || [],
+        build.offhand || [],
+        build.helmet || [],
+        build.armor || [],
+        build.shoes || [],
+        build.cape || [],
+        build.food || [],
+        build.potion || []
+      ];
+
+      return `
+        <div class="utc-slot-build">
+          ${parts.map((items, index) => {
+            const fixedItems = items.length ? items : ["미정"];
+
+            return `
+              <div class="utc-gear-cell">
+                <div class="utc-gear-label">${utcBuildLabels[index]}</div>
+                <div class="utc-gear-options">
+                  ${fixedItems.map(item => `
+                    <div class="utc-gear-option" data-tooltip="${item}" title="${item}">
+                      ${
+                        item === "없음"
+                          ? `<div class="utc-empty-item" title="없음"><div class="utc-empty-icon">×</div><div class="utc-empty-text">없음</div></div>`
+                          : item === "미정"
+                            ? `<div class="utc-empty-item" title="미정"><div class="utc-empty-icon">?</div><div class="utc-empty-text">미정</div></div>`
+                            : item === "가죽재킷"
+                              ? `<div class="utc-text-item" title="2번스킬 사용">가죽재킷</div>`
+                              : item === "텔포신발"
+                                ? `<div class="utc-text-item" title="추적자 신발, 성직자 샌들 등">텔포신발</div>`
+                                : getEquipmentIconHtml(item, "utc-gear-icon")
+                      }
+                    </div>
+                  `).join("")}
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function utcSheetDocRef() {
+      return doc(db, "utcSheets", "12UTC");
+    }
+
+    function getUtcSlotId(mode, partyNumber, roleKey, index) {
+      return `${mode}_party${partyNumber}_${roleKey}_${index}`;
+    }
+
+    function getUtcSlotWeapon(build) {
+      if (!build || !build.weapon || !build.weapon.length) return "미정";
+      return build.weapon[0];
+    }
+
+    function startUtcListener() {
+      if (utcUnsubscribe) utcUnsubscribe();
+
+      utcUnsubscribe = onSnapshot(utcSheetDocRef(), (snap) => {
+        utcParticipants = snap.exists() ? (snap.data().participants || {}) : {};
+        renderUtcSheet();
+      }, (error) => {
+        console.warn("12UTC 참가 현황 불러오기 실패:", error);
+      });
+    }
+
+    function stopUtcListener() {
+      if (utcUnsubscribe) {
+        utcUnsubscribe();
+        utcUnsubscribe = null;
+      }
+
+      utcParticipants = {};
+      renderUtcSheet();
+    }
+
+    window.joinUtcSlot = async function (slotId, role, weapon) {
+      if (!currentUser) {
+        alert("먼저 구글 로그인을 해주세요.");
+        return;
+      }
+
+      if (!currentNickname) {
+        alert("먼저 닉네임을 설정해주세요.");
+        return;
+      }
+
+      const current = utcParticipants[slotId];
+
+      if (current && current.uid && current.uid !== currentUser.uid) {
+        alert("이미 다른 사람이 참가한 자리입니다.");
+        return;
+      }
+
+      const nextParticipants = { ...(utcParticipants || {}) };
+
+      if (current && current.uid === currentUser.uid) {
+        delete nextParticipants[slotId];
+      } else {
+        Object.keys(nextParticipants).forEach(key => {
+          const item = nextParticipants[key];
+
+          if (item && item.uid === currentUser.uid) {
+            delete nextParticipants[key];
+          }
+        });
+
+        nextParticipants[slotId] = {
+          uid: currentUser.uid,
+          nickname: currentNickname,
+          role,
+          weapon,
+          mode: selectedUtcMode,
+          updatedAt: new Date().toISOString()
+        };
+      }
+
+      try {
+        await setDoc(utcSheetDocRef(), {
+          participants: nextParticipants,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+
+        utcParticipants = nextParticipants;
+        renderUtcSheet();
+      } catch (error) {
+        alert("참가 저장 실패: " + error.message);
+      }
+    };
+
+    function getUtcParticipant(slotId) {
+      return utcParticipants[slotId] || null;
+    }
+
+    function getUtcSlotClass(slotId) {
+      const participant = getUtcParticipant(slotId);
+
+      if (!participant) return "";
+      if (currentUser && participant.uid === currentUser.uid) return "joined";
+      return "occupied";
+    }
+
+    function getUtcParticipantText(slotId) {
+      const participant = getUtcParticipant(slotId);
+
+      if (!participant) return "참가하기";
+      return participant.nickname || "이름없음";
+    }
+
+    function renderUtcParticipantPanel(party1, party2) {
+      const panel1 = document.getElementById("utcParticipantPanelParty1");
+      const panel2 = document.getElementById("utcParticipantPanelParty2");
+      if (!panel1 || !panel2) return;
+
+      function renderParty(partyNumber, partyBuilds) {
+        const sections = utcPartyRoles.map(group => {
+          const builds = partyBuilds[group.key] || [];
+          if (!builds.length) return "";
+
+          const buttons = builds.map((build, index) => {
+            const slotId = getUtcSlotId(selectedUtcMode, partyNumber, group.key, index);
+            const weapon = getUtcSlotWeapon(build);
+            const participant = getUtcParticipant(slotId);
+            const className = getUtcSlotClass(slotId);
+
+            return `
+              <button class="utc-sidebar-slot-btn ${className}" onclick="joinUtcSlot('${slotId}', '${group.role}', '${weapon}')">
+                <span class="utc-sidebar-weapon">${weapon}</span>
+                <span class="utc-sidebar-user">${participant ? participant.nickname : "참가하기"}</span>
+              </button>
+            `;
+          }).join("");
+
+          return `
+            <div class="utc-sidebar-role">
+              <div class="utc-sidebar-role-title">${group.role}</div>
+              ${buttons}
+            </div>
+          `;
+        }).filter(Boolean).join("");
+
+        return sections || `<div class="empty-fight">아직 슬롯이 없습니다.</div>`;
+      }
+
+      panel1.innerHTML = renderParty(1, party1);
+      panel2.innerHTML = renderParty(2, party2);
+    }
+
+    function getUtcRoleFilledCountFromBuilds(roleKey, partyBuilds, partyNumber) {
+      const builds = partyBuilds[roleKey] || [];
+      return builds.filter((_, index) => {
+        const slotId = getUtcSlotId(selectedUtcMode, partyNumber, roleKey, index);
+        return !!getUtcParticipant(slotId);
+      }).length;
+    }
+
+    function renderUtcSheet() {
+      const grid = document.getElementById("utcSheetGrid");
+      const title = document.getElementById("utcSheetTitle");
+      const totalBadge = document.getElementById("utcTotalBadge");
+
+      if (!grid || !title) return;
+
+      const modeName = utcModes[selectedUtcMode] || "클랩";
+      const templates = utcBuildTemplates[selectedUtcMode] || {};
+      const totalCount = utcSheetRoles.reduce((sum, group) => sum + group.count, 0);
+
+      title.textContent = `${modeName} 시트 모집`;
+      if (totalBadge) totalBadge.textContent = `${totalCount}칸`;
+
+      updateUtcMassBadge();
+
+      function renderRoleSection(group, partyNumber, partyBuilds) {
+        const builds = partyBuilds[group.key] || [];
+        const maxCount = builds.length;
+        const filled = getUtcRoleFilledCountFromBuilds(group.key, partyBuilds, partyNumber);
+        const statusClass = getUtcStatusClass(filled, maxCount || 1);
+
+        if (!maxCount) return "";
+
+        const slots = builds.map((build, index) => {
+          const slotId = getUtcSlotId(selectedUtcMode, partyNumber, group.key, index);
+          const weapon = getUtcSlotWeapon(build);
+          const slotClass = getUtcSlotClass(slotId);
+          const participantText = getUtcParticipantText(slotId);
+
+          return `
+            <div class="utc-slot ${slotClass}">
+              <div>
+                <div class="utc-slot-name">${group.role} ${index + 1}</div>
+                ${renderUtcBuild(build)}
+              </div>
+              <button
+                class="utc-slot-participant ${slotClass}"
+                onclick="joinUtcSlot('${slotId}', '${group.role}', '${weapon}')"
+              >
+                ${participantText}
+              </button>
+            </div>
+          `;
+        }).join("");
+
+        return `
+          <section class="utc-role-section" id="utc-role-${group.key}${partyNumber === 1 ? "" : "-party2"}">
+            <div class="utc-role-head">
+              <div class="utc-role-title">${group.role}</div>
+              <div class="utc-role-count ${statusClass}">${filled}/${maxCount}</div>
+            </div>
+            <div class="utc-slot-grid">
+              ${slots}
+            </div>
+          </section>
+        `;
+      }
+
+      const party1 = {};
+      const party2 = {};
+
+      Object.keys(templates).forEach(roleKey => {
+        party1[roleKey] = [];
+        party2[roleKey] = [];
+
+        templates[roleKey].forEach(build => {
+          if (build.party === 2) {
+            party2[roleKey].push(build);
+          } else {
+            party1[roleKey].push(build);
+          }
+        });
+      });
+
+      renderUtcRoleNav();
+      renderUtcParticipantPanel(party1, party2);
+
+      const party1Html = utcPartyRoles
+        .map(group => renderRoleSection(group, 1, party1))
+        .filter(Boolean)
+        .join("");
+
+      const party2Html = utcPartyRoles
+        .map(group => renderRoleSection(group, 2, party2))
+        .filter(Boolean)
+        .join("");
+
+      grid.innerHTML = `
+        <div class="utc-party-label">1파티</div>
+        ${party1Html}
+        <div class="utc-party-label">2파티</div>
+        ${party2Html || `<div class="empty-fight">2파티 슬롯이 아직 없습니다.</div>`}
+      `;
+    }
+
+    setInterval(() => {
+      updateUtcMassBadge();
+    }, 30000);
+
+    setInterval(() => {
+      if (currentUser && (isAllowedUser || isAdminUser)) {
+        ensureUtcSheetDailyReset().catch(error => {
+          console.warn("12UTC 자정 초기화 확인 실패:", error);
+        });
+      }
+    }, 60000);
+
+    function initTimeSelects() {
+      const hourSelect = document.getElementById("fightStartHour");
+      const minuteSelect = document.getElementById("fightStartMinute");
+
+      if (!hourSelect || !minuteSelect) return;
+
+      hourSelect.innerHTML = Array.from({ length: 24 }, (_, hour) => {
+        const value = String(hour).padStart(2, "0");
+        return `<option value="${value}">${value}시</option>`;
+      }).join("");
+
+      minuteSelect.innerHTML = Array.from({ length: 12 }, (_, index) => {
+        const minute = String(index * 5).padStart(2, "0");
+        return `<option value="${minute}">${minute}분</option>`;
+      }).join("");
+
+      const now = new Date();
+      const roundedMinute = Math.ceil(now.getMinutes() / 5) * 5;
+      const selected = new Date(now);
+
+      if (roundedMinute >= 60) {
+        selected.setHours(selected.getHours() + 1);
+        selected.setMinutes(0);
+      } else {
+        selected.setMinutes(roundedMinute);
+      }
+
+      hourSelect.value = String(selected.getHours()).padStart(2, "0");
+      minuteSelect.value = String(selected.getMinutes()).padStart(2, "0");
+    }
+
+    function getSelectedStartTime() {
+      const hour = document.getElementById("fightStartHour").value;
+      const minute = document.getElementById("fightStartMinute").value;
+      const now = new Date();
+      const start = new Date();
+
+      start.setHours(Number(hour), Number(minute), 0, 0);
+
+      if (start.getTime() <= now.getTime()) {
+        start.setDate(start.getDate() + 1);
+      }
+
+      return {
+        startTime: `${hour}:${minute}`,
+        startAt: start.toISOString()
+      };
+    }
+
+    function getTimeLeftInfo(startAt) {
+      if (!startAt) {
+        return {
+          diffMs: Number.MAX_SAFE_INTEGER,
+          text: "시간 미정",
+          colorClass: "time-blue",
+          expiredForDelete: false
+        };
+      }
+
+      const startTime = new Date(startAt).getTime();
+      const now = Date.now();
+      const diffMs = startTime - now;
+
+      if (diffMs < -10 * 60 * 1000) {
+        return {
+          diffMs,
+          text: "출발 10분 경과",
+          colorClass: "time-red",
+          expiredForDelete: true
+        };
+      }
+
+      if (diffMs <= 0) {
+        const passedMinutes = Math.floor(Math.abs(diffMs) / 60000);
+        return {
+          diffMs,
+          text: passedMinutes <= 0 ? "출발 시간" : `출발 후 ${passedMinutes}분`,
+          colorClass: "time-red",
+          expiredForDelete: false
+        };
+      }
+
+      const totalMinutes = Math.ceil(diffMs / 60000);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+
+      let text = "";
+
+      if (hours > 0 && minutes > 0) {
+        text = `${hours}시간 ${minutes}분 남음`;
+      } else if (hours > 0) {
+        text = `${hours}시간 남음`;
+      } else {
+        text = `${minutes}분 남음`;
+      }
+
+      let colorClass = "time-blue";
+
+      if (totalMinutes <= 10) {
+        colorClass = "time-red";
+      } else if (totalMinutes <= 30) {
+        colorClass = "time-yellow";
+      } else if (totalMinutes <= 60) {
+        colorClass = "time-green";
+      }
+
+      return {
+        diffMs,
+        text,
+        colorClass,
+        expiredForDelete: false
+      };
+    }
+
+    window.setFightSortMode = function (mode) {
+      fightSortMode = mode;
+
+      document.getElementById("sortRecentBtn").classList.toggle("active", mode === "recent");
+      document.getElementById("sortSoonBtn").classList.toggle("active", mode === "soon");
+
+      renderFightPosts(fightPostsCache);
+    };
+
+    window.setContentFilter = function (value) {
+      contentFilter = value || "전체";
+      renderFightPosts(fightPostsCache);
+    };
+
+    function startCountdownTimer() {
+      if (countdownTimer) clearInterval(countdownTimer);
+
+      countdownTimer = setInterval(() => {
+        if (fightPostsCache.length) {
+          renderFightPosts(fightPostsCache);
+          autoDeleteExpiredPosts();
+        }
+      }, 30000);
+    }
+
+    window.switchTab = function (tabName) {
+      const utcTab = document.getElementById("utcTab");
+      const masteryTab = document.getElementById("masteryTab");
+      const fightTab = document.getElementById("fightTab");
+      const utcBtn = document.getElementById("utcTabBtn");
+      const masteryBtn = document.getElementById("masteryTabBtn");
+      const fightBtn = document.getElementById("fightTabBtn");
+
+      utcTab.classList.toggle("active", tabName === "utc");
+      masteryTab.classList.toggle("active", tabName === "mastery");
+      fightTab.classList.toggle("active", tabName === "fight");
+      utcBtn.classList.toggle("active", tabName === "utc");
+      masteryBtn.classList.toggle("active", tabName === "mastery");
+      fightBtn.classList.toggle("active", tabName === "fight");
+    };
+
+    function setAccessGate(state, message) {
+      const gate = document.getElementById("accessGate");
+      const msg = document.getElementById("accessGateMessage");
+
+      if (!gate || !msg) return;
+
+      msg.textContent = message || "";
+
+      if (state === "allowed") {
+        document.body.classList.remove("access-locked");
+        gate.style.display = "none";
+      } else {
+        document.body.classList.add("access-locked");
+        gate.style.display = "block";
+      }
+    }
+
+    async function checkAccess(uid) {
+      const allowedSnap = await getDoc(doc(db, "allowedUsers", uid));
+      const adminSnap = await getDoc(doc(db, "adminUsers", uid));
+
+      isAllowedUser = allowedSnap.exists();
+      isAdminUser = adminSnap.exists();
+
+      return {
+        allowed: isAllowedUser,
+        admin: isAdminUser
+      };
+    }
+
+    function getLocalDateKey() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    async function ensureUtcSheetDailyReset() {
+      if (!currentUser) return;
+
+      const todayKey = getLocalDateKey();
+      const ref = utcSheetDocRef();
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : {};
+      const resetDate = data.resetDate || "";
+
+      if (resetDate !== todayKey) {
+        await setDoc(ref, {
+          participants: {},
+          resetDate: todayKey,
+          resetAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+
+        utcParticipants = {};
+        renderUtcSheet();
+      }
+    }
+
+    async function createApprovalRequest(user) {
+      if (!user) return;
+
+      const ref = doc(db, "approvalRequests", user.uid);
+      const snap = await getDoc(ref);
+
+      if (snap.exists()) return;
+
+      await setDoc(ref, {
+        uid: user.uid,
+        email: user.email || "",
+        displayName: user.displayName || "",
+        nickname: user.displayName || "",
+        status: "pending",
+        requestedAt: new Date().toISOString()
+      }, { merge: true });
+    }
+
+    function startApprovalListener() {
+      if (approvalUnsubscribe) approvalUnsubscribe();
+
+      approvalUnsubscribe = onSnapshot(collection(db, "approvalRequests"), (snap) => {
+        const requests = [];
+
+        snap.forEach(docSnap => {
+          const data = docSnap.data() || {};
+          if ((data.status || "pending") === "pending") {
+            requests.push({
+              id: docSnap.id,
+              ...data
+            });
+          }
+        });
+
+        renderApprovalList(requests);
+      }, (error) => {
+        console.warn("승인 대기 목록 불러오기 실패:", error);
+      });
+    }
+
+    function stopApprovalListener() {
+      if (approvalUnsubscribe) {
+        approvalUnsubscribe();
+        approvalUnsubscribe = null;
+      }
+
+      renderApprovalList([]);
+    }
+
+    function renderApprovalList(requests) {
+      const list = document.getElementById("approvalList");
+      const count = document.getElementById("approvalCount");
+
+      if (!list || !count) return;
+
+      count.textContent = `${requests.length}명 대기중`;
+
+      if (!requests.length) {
+        list.innerHTML = `<div class="empty-fight">승인 대기 유저가 없습니다.</div>`;
+        return;
+      }
+
+      list.innerHTML = requests.map(req => `
+        <div class="admin-user-card">
+          <div class="admin-user-title">${req.nickname || req.displayName || "닉네임 없음"}</div>
+          <div class="admin-user-meta">
+            이메일: ${req.email || "없음"}<br>
+            UID: ${req.uid || req.id}<br>
+            신청 시간: ${req.requestedAt || "기록 없음"}
+          </div>
+          <div class="admin-actions">
+            <button class="btn" onclick="approveUser('${req.id}', '${(req.nickname || req.displayName || "").replace(/'/g, "\\'")}', '${(req.email || "").replace(/'/g, "\\'")}')">승인</button>
+            <button class="btn btn-secondary" onclick="rejectUser('${req.id}')">거절</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    window.approveUser = async function (uid, nickname, email) {
+      if (!isAdminUser) {
+        alert("관리자만 승인할 수 있습니다.");
+        return;
+      }
+
+      try {
+        await setDoc(doc(db, "allowedUsers", uid), {
+          nickname: nickname || email || uid,
+          email: email || "",
+          approved: true,
+          approvedAt: new Date().toISOString(),
+          approvedBy: currentUser.uid
+        }, { merge: true });
+
+        await setDoc(doc(db, "approvalRequests", uid), {
+          status: "approved",
+          approvedAt: new Date().toISOString(),
+          approvedBy: currentUser.uid
+        }, { merge: true });
+
+        alert("승인 완료");
+      } catch (error) {
+        alert("승인 실패: " + error.message);
+      }
+    };
+
+    window.rejectUser = async function (uid) {
+      if (!isAdminUser) {
+        alert("관리자만 거절할 수 있습니다.");
+        return;
+      }
+
+      try {
+        await setDoc(doc(db, "approvalRequests", uid), {
+          status: "rejected",
+          rejectedAt: new Date().toISOString(),
+          rejectedBy: currentUser.uid
+        }, { merge: true });
+
+        alert("거절 완료");
+      } catch (error) {
+        alert("거절 실패: " + error.message);
+      }
+    };
+
+    window.login = async function () {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        alert("로그인 실패: " + error.message);
+      }
+    };
+
+    window.logout = async function () {
+      try {
+        await signOut(auth);
+      } catch (error) {
+        alert("로그아웃 실패: " + error.message);
+      }
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+
+      if (user) {
+        document.getElementById("loginStatus").innerHTML = `로그인됨<br>${user.displayName || ""}<br>${user.email || ""}`;
+        document.getElementById("saveStatus").textContent = "승인 확인 중...";
+
+        let access = { allowed: false, admin: false };
+
+        try {
+          access = await checkAccess(user.uid);
+        } catch (error) {
+          setAccessGate("denied", "사용자 승인 확인에 실패했습니다. 관리자에게 문의해주세요.");
+          document.getElementById("saveStatus").textContent = "승인 확인 실패";
+          console.warn("승인 확인 실패:", error);
+          return;
+        }
+
+        await loadProfile();
+
+        if (!access.allowed && !access.admin) {
+          try {
+            await createApprovalRequest(user);
+          } catch (error) {
+            console.warn("승인 요청 생성 실패:", error);
+          }
+
+          setAccessGate("denied", "승인 대기 중입니다. 관리자에게 UID를 전달해주세요: " + user.uid);
+          document.getElementById("saveStatus").textContent = "승인 대기 중";
+          stopFightListener();
+          stopUtcListener();
+          stopApprovalListener();
+          renderFightPosts([]);
+          return;
+        }
+
+        setAccessGate("allowed", "");
+        document.getElementById("adminTabBtn").style.display = access.admin ? "block" : "none";
+        document.getElementById("saveStatus").textContent = "데이터 불러오는 중...";
+        await loadFromFirestore();
+        await ensureUtcSheetDailyReset();
+        startFightListener();
+        startUtcListener();
+
+        if (access.admin) {
+          startApprovalListener();
+        } else {
+          stopApprovalListener();
+        }
+      } else {
+        currentUser = null;
+        currentNickname = "";
+        isAllowedUser = false;
+        isAdminUser = false;
+        setAccessGate("login", "구글 로그인 후 승인된 사용자만 이용할 수 있습니다.");
+        document.getElementById("loginStatus").textContent = "로그인이 필요합니다. 로그인 전에는 입력값이 저장되지 않습니다.";
+        document.getElementById("saveStatus").textContent = "";
+        masteryData = {};
+        currentNickname = "";
+        isLoaded = false;
+        resetNicknameUI();
+        stopFightListener();
+        stopUtcListener();
+        stopApprovalListener();
+        const adminBtn = document.getElementById("adminTabBtn");
+        if (adminBtn) adminBtn.style.display = "none";
+        renderFightPosts([]);
+        render();
+      }
+    });
+
+    function userDocRef() {
+      return doc(db, "users", currentUser.uid, "mastery", "data");
+    }
+
+    function profileDocRef() {
+      return doc(db, "users", currentUser.uid, "profile", "data");
+    }
+
+    function resetNicknameUI() {
+      const input = document.getElementById("nicknameInput");
+      const button = document.getElementById("nicknameSaveBtn");
+      const help = document.getElementById("nicknameHelp");
+
+      input.value = "";
+      input.disabled = true;
+      button.disabled = true;
+      help.textContent = "로그인 후 닉네임을 한 번만 설정할 수 있습니다.";
+    }
+
+    async function loadProfile() {
+      if (!currentUser) return;
+
+      const input = document.getElementById("nicknameInput");
+      const button = document.getElementById("nicknameSaveBtn");
+      const help = document.getElementById("nicknameHelp");
+
+      try {
+        const snap = await getDoc(profileDocRef());
+
+        if (snap.exists() && snap.data().nickname) {
+          currentNickname = snap.data().nickname;
+          input.value = currentNickname;
+          input.disabled = true;
+          button.disabled = true;
+          help.textContent = "닉네임 설정 완료: 한 계정당 하나의 닉네임만 사용할 수 있습니다.";
+        } else {
+          currentNickname = "";
+          input.value = "";
+          input.disabled = false;
+          button.disabled = false;
+          help.textContent = "닉네임은 한 번 설정하면 이 화면에서 수정할 수 없습니다.";
+        }
+      } catch (error) {
+        help.textContent = "닉네임 불러오기 실패";
+        alert("닉네임 불러오기 실패: " + error.message);
+      }
+    }
+
+    window.saveNickname = async function () {
+      if (!currentUser) {
+        alert("먼저 구글 로그인을 해주세요.");
+        return;
+      }
+
+      if (currentNickname) {
+        alert("이미 닉네임이 설정되어 있습니다.");
+        return;
+      }
+
+      const input = document.getElementById("nicknameInput");
+      const button = document.getElementById("nicknameSaveBtn");
+      const help = document.getElementById("nicknameHelp");
+      const nickname = input.value.trim();
+
+      if (!nickname) {
+        alert("닉네임을 입력해주세요.");
+        return;
+      }
+
+      if (nickname.length < 2 || nickname.length > 16) {
+        alert("닉네임은 2~16자로 입력해주세요.");
+        return;
+      }
+
+      try {
+        button.disabled = true;
+
+        await setDoc(profileDocRef(), {
+          nickname,
+          uid: currentUser.uid,
+          email: currentUser.email || "",
+          createdAt: new Date().toISOString()
+        });
+
+        currentNickname = nickname;
+        input.value = nickname;
+        input.disabled = true;
+        button.disabled = true;
+        help.textContent = "닉네임 설정 완료: 한 계정당 하나의 닉네임만 사용할 수 있습니다.";
+      } catch (error) {
+        button.disabled = false;
+        alert("닉네임 저장 실패: " + error.message);
+      }
+    };
+
+    async function loadFromFirestore() {
+      if (!currentUser) return;
+
+      try {
+        const snap = await getDoc(userDocRef());
+
+        if (snap.exists()) {
+          masteryData = snap.data().masteryData || {};
+        } else {
+          masteryData = {};
+        }
+
+        isLoaded = true;
+        document.getElementById("saveStatus").textContent = "불러오기 완료";
+        render();
+      } catch (error) {
+        document.getElementById("saveStatus").textContent = "불러오기 실패";
+        alert("데이터 불러오기 실패: " + error.message);
+      }
+    }
+
+    function scheduleSaveToFirestore() {
+      if (!currentUser || !isLoaded) return;
+
+      document.getElementById("saveStatus").textContent = "저장 중...";
+      clearTimeout(saveTimer);
+
+      saveTimer = setTimeout(async () => {
+        try {
+          await setDoc(userDocRef(), {
+            masteryData,
+            updatedAt: new Date().toISOString()
+          });
+          document.getElementById("saveStatus").textContent = "자동 저장 완료";
+        } catch (error) {
+          document.getElementById("saveStatus").textContent = "저장 실패";
+          alert("저장 실패: " + error.message);
+        }
+      }, 400);
+    }
+
+    function makeKey(category, equipment) {
+      return category + "__" + equipment;
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function getLevel(category, equipment) {
+      const key = makeKey(category, equipment);
+      return masteryData[key]?.level || 0;
+    }
+
+    window.setLevel = function (category, equipment, value, inputElement) {
+      if (!currentUser) {
+        alert("먼저 구글 로그인을 해주세요.");
+        inputElement.value = getLevel(category, equipment);
+        return;
+      }
+
+      const cleanValue = clamp(Number(value) || 0, 0, 120);
+      const key = makeKey(category, equipment);
+
+      masteryData[key] = {
+        category,
+        equipment,
+        level: cleanValue
+      };
+
+      inputElement.value = cleanValue;
+      updateSingleEquipmentCard(inputElement, cleanValue);
+      updateSummary();
+      updateSelectedCategoryProgress();
+      scheduleSaveToFirestore();
+    };
+
+    function updateSingleEquipmentCard(inputElement, level) {
+      const card = inputElement.closest(".equipment-input-card");
+      const miniFill = card.querySelector(".mini-fill");
+      const levelText = card.querySelector(".level-text");
+
+      miniFill.style.width = getPercent120(level) + "%";
+      levelText.textContent = level + "/120";
+    }
+
+    function getPercent100(level) {
+      return Math.round((Math.min(level, 100) / 100) * 100);
+    }
+
+    function getPercent120(level) {
+      return Math.round((Math.min(level, 120) / 120) * 100);
+    }
+
+    window.selectCategory = function (category) {
+      selectedCategory = category;
+      render();
+    };
+
+    function renderCategoryButtons() {
+      const weaponWrap = document.getElementById("weaponButtons");
+      const offhandWrap = document.getElementById("offhandButtons");
+      const armorWrap = document.getElementById("armorButtons");
+
+      weaponWrap.innerHTML = weaponCategories.map(category => `
+        <button class="category-btn ${category === selectedCategory ? "active" : ""}" onclick="selectCategory('${category}')">
+          ${category}
+        </button>
+      `).join("");
+
+      offhandWrap.innerHTML = offhandCategories.map(category => `
+        <button class="category-btn ${category === selectedCategory ? "active" : ""}" onclick="selectCategory('${category}')">
+          ${category}
+        </button>
+      `).join("");
+
+      armorWrap.innerHTML = armorCategories.map(category => `
+        <button class="category-btn ${category === selectedCategory ? "active" : ""}" onclick="selectCategory('${category}')">
+          ${category}
+        </button>
+      `).join("");
+    }
+
+    function getAllEquipmentItems() {
+      const result = [];
+
+      Object.keys(equipmentData).forEach(category => {
+        equipmentData[category].forEach(equipment => {
+          result.push({
+            category,
+            equipment,
+            level: getLevel(category, equipment)
+          });
+        });
+      });
+
+      return result;
+    }
+
+    function updateSummary() {
+      const allItems = getAllEquipmentItems();
+
+      const avgLevel = Math.round(allItems.reduce((sum, item) => sum + item.level, 0) / allItems.length);
+      const avg100 = Math.round(allItems.reduce((sum, item) => sum + getPercent100(item.level), 0) / allItems.length);
+      const avg120 = Math.round(allItems.reduce((sum, item) => sum + getPercent120(item.level), 0) / allItems.length);
+
+      const completed100 = allItems.filter(item => item.level >= 100).length;
+      const completed120 = allItems.filter(item => item.level >= 120).length;
+
+      document.getElementById("avgLevel").textContent = avgLevel;
+      document.getElementById("completed100Items").textContent = completed100;
+      document.getElementById("completed120Items").textContent = completed120;
+
+      document.getElementById("overall100Percent").textContent = avg100 + "%";
+      document.getElementById("overall100Bar").style.width = avg100 + "%";
+
+      document.getElementById("overall120Percent").textContent = avg120 + "%";
+      document.getElementById("overall120Bar").style.width = avg120 + "%";
+
+      renderRecruitConditionList();
+      updateConditionPreview();
+    }
+
+    function updateSelectedCategoryProgress() {
+      const equipments = equipmentData[selectedCategory];
+
+      const category100Avg = Math.round(
+        equipments.reduce((sum, equipment) => sum + getPercent100(getLevel(selectedCategory, equipment)), 0) / equipments.length
+      );
+
+      const category120Avg = Math.round(
+        equipments.reduce((sum, equipment) => sum + getPercent120(getLevel(selectedCategory, equipment)), 0) / equipments.length
+      );
+
+      const completed100 = equipments.filter(equipment => getLevel(selectedCategory, equipment) >= 100).length;
+      const completed120 = equipments.filter(equipment => getLevel(selectedCategory, equipment) >= 120).length;
+
+      document.getElementById("category100Badge").textContent = `100레벨 ${completed100}/${equipments.length} 완료`;
+      document.getElementById("category120Badge").textContent = `120레벨 ${completed120}/${equipments.length} 완료`;
+
+      document.getElementById("category100Percent").textContent = category100Avg + "%";
+      document.getElementById("category100Bar").style.width = category100Avg + "%";
+
+      document.getElementById("category120Percent").textContent = category120Avg + "%";
+      document.getElementById("category120Bar").style.width = category120Avg + "%";
+    }
+
+    function renderSelectedCategory() {
+      const equipments = equipmentData[selectedCategory];
+
+      document.getElementById("selectedCategoryTitle").textContent = selectedCategory;
+      updateSelectedCategoryProgress();
+
+      document.getElementById("equipmentInputGrid").innerHTML = equipments.map(equipment => {
+        const level = getLevel(selectedCategory, equipment);
+        const percent120 = getPercent120(level);
+
+        return `
+          <div class="equipment-input-card">
+            <div class="equipment-name equipment-title-row">
+              ${getEquipmentIconHtml(equipment)}
+              <span>${equipment}</span>
+            </div>
+
+            <input
+              type="number"
+              inputmode="numeric"
+              min="0"
+              max="120"
+              value="${level}"
+              ${!currentUser ? "disabled" : ""}
+              oninput="setLevel('${selectedCategory}', '${equipment}', this.value, this)"
+              placeholder="0 ~ 120"
+            />
+
+            <div class="mini-bar">
+              <div class="mini-fill" style="width: ${percent120}%"></div>
+            </div>
+
+            <div class="small-text">
+              <span>숙련도</span>
+              <span class="level-text">${level}/120</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+
+
+    function getRoleButtonId(role) {
+      if (role === "탱커") return "roleTankBtn";
+      if (role === "힐러") return "roleHealerBtn";
+      return "roleDealerBtn";
+    }
+
+    window.setConditionMode = function (enabled) {
+      conditionEnabled = enabled;
+
+      document.getElementById("conditionNoneBtn").classList.toggle("active", !enabled);
+      document.getElementById("conditionYesBtn").classList.toggle("active", enabled);
+      document.getElementById("conditionPickArea").classList.toggle("active", enabled);
+
+      if (!enabled) {
+        recruitConditions = [];
+        selectedConditionRole = "";
+        selectedConditionCategory = "";
+        renderConditionRoleButtons();
+        renderConditionCategoryButtons();
+        renderRecruitConditionList();
+      } else if (!selectedConditionRole) {
+        selectConditionRole("딜러");
+      }
+
+      updateConditionPreview();
+    };
+
+    function renderConditionRoleButtons() {
+      ["탱커", "힐러", "딜러"].forEach(role => {
+        const button = document.getElementById(getRoleButtonId(role));
+        if (button) {
+          button.classList.toggle("active", selectedConditionRole === role);
+        }
+      });
+    }
+
+    window.selectConditionRole = function (role) {
+      selectedConditionRole = role;
+
+      const availableCategories = (roleCategoryMap[role] || [])
+        .filter(category => getConditionEquipmentList(role, category).length > 0);
+
+      selectedConditionCategory = availableCategories[0] || "";
+
+      renderConditionRoleButtons();
+      renderConditionCategoryButtons();
+      updateConditionEquipmentOptions();
+      updateConditionPreview();
+    };
+
+    function renderConditionCategoryButtons() {
+      const wrap = document.getElementById("conditionCategoryButtons");
+      if (!wrap) return;
+
+      if (!conditionEnabled || !selectedConditionRole) {
+        wrap.innerHTML = "";
+        return;
+      }
+
+      const categories = (roleCategoryMap[selectedConditionRole] || [])
+        .filter(category => getConditionEquipmentList(selectedConditionRole, category).length > 0);
+
+      wrap.innerHTML = categories.map(category => `
+        <button
+          type="button"
+          class="condition-btn ${category === selectedConditionCategory ? "active" : ""}"
+          onclick="selectConditionCategory('${category}')"
+        >
+          ${category}
+        </button>
+      `).join("");
+    }
+
+    window.selectConditionCategory = function (category) {
+      selectedConditionCategory = category;
+      renderConditionCategoryButtons();
+      updateConditionEquipmentOptions();
+      updateConditionPreview();
+    };
+
+    function updateConditionEquipmentOptions() {
+      const select = document.getElementById("fightRequiredEquipment");
+      if (!select) return;
+
+      if (!conditionEnabled || !selectedConditionRole || !selectedConditionCategory) {
+        select.innerHTML = "";
+        return;
+      }
+
+      const equipmentList = getConditionEquipmentList(selectedConditionRole, selectedConditionCategory);
+
+      if (!equipmentList.length) {
+        select.innerHTML = "";
+        return;
+      }
+
+      select.innerHTML = equipmentList.map(equipment => `
+        <option value="${equipment}">${equipment}</option>
+      `).join("");
+
+      updateConditionEquipmentPreview();
+    }
+
+    window.updateConditionEquipmentPreview = function () {
+      const preview = document.getElementById("conditionEquipmentPreview");
+      const select = document.getElementById("fightRequiredEquipment");
+
+      if (!preview || !select) return;
+
+      const equipment = select.value;
+
+      if (!conditionEnabled || !equipment) {
+        preview.innerHTML = "무기를 선택하면 아이콘이 표시됩니다.";
+        return;
+      }
+
+      preview.innerHTML = `
+        <div class="condition-option-row">
+          ${getEquipmentIconHtml(equipment, "condition-select-option-icon")}
+          <strong>${equipment}</strong>
+        </div>
+      `;
+    };
+
+    function getDraftConditionInfo() {
+      const equipmentSelect = document.getElementById("fightRequiredEquipment");
+      const levelInput = document.getElementById("fightRequiredLevel");
+
+      if (!conditionEnabled || !selectedConditionRole || !selectedConditionCategory || !equipmentSelect || !levelInput) {
+        return null;
+      }
+
+      const equipment = equipmentSelect.value;
+      const level = clamp(Number(levelInput.value) || 0, 0, 120);
+      levelInput.value = level;
+
+      if (!equipment || level <= 0) return null;
+
+      return {
+        role: selectedConditionRole,
+        category: selectedConditionCategory,
+        equipment,
+        level
+      };
+    }
+
+    window.addRecruitCondition = function () {
+      const condition = getDraftConditionInfo();
+
+      if (!condition) {
+        alert("역할, 무기 계열, 무기, 필요 레벨을 선택해주세요.");
+        return;
+      }
+
+      recruitConditions.push(condition);
+      renderRecruitConditionList();
+      updateConditionPreview();
+    };
+
+    window.removeRecruitCondition = function (index) {
+      recruitConditions.splice(index, 1);
+      renderRecruitConditionList();
+      updateConditionPreview();
+    };
+
+    function renderRecruitConditionList() {
+      const list = document.getElementById("conditionList");
+      if (!list) return;
+
+      if (!recruitConditions.length) {
+        list.innerHTML = "";
+        return;
+      }
+
+      list.innerHTML = recruitConditions.map((condition, index) => {
+        return `
+          <div class="condition-chip">
+            <div>
+              <span class="condition-option-row">
+                ${getEquipmentIconHtml(condition.equipment, "condition-select-option-icon")}
+                <span><strong>${condition.role}</strong> · ${condition.equipment} ${condition.level}레벨 이상</span>
+              </span>
+            </div>
+            <button class="condition-remove" type="button" onclick="removeRecruitCondition(${index})">삭제</button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function getActiveRecruitConditions() {
+      if (!conditionEnabled) return [];
+      return recruitConditions;
+    }
+
+    window.updateConditionPreview = function () {
+      const preview = document.getElementById("conditionPreview");
+      if (!preview) return;
+
+      preview.classList.remove("ok", "no");
+
+      if (!conditionEnabled) {
+        preview.textContent = "조건 없음: 누구나 참가 가능";
+        return;
+      }
+
+      const draft = getDraftConditionInfo();
+
+      if (!recruitConditions.length && !draft) {
+        preview.textContent = "조건 있음: 역할과 무기를 선택한 뒤 조건 추가를 눌러주세요.";
+        return;
+      }
+
+      const totalCount = recruitConditions.length + (draft ? 1 : 0);
+
+      preview.textContent = recruitConditions.length
+        ? `조건 ${recruitConditions.length}개 추가됨: 모집글에 참가자 기준으로 가능/미달이 표시됩니다.`
+        : `선택 중: ${draft.role} ${draft.equipment} ${draft.level}레벨 이상 조건을 추가할 수 있습니다.`;
+    };
+
+    function fightCollectionRef() {
+      return collection(db, "fightPosts");
+    }
+
+    function startFightListener() {
+      if (fightUnsubscribe) fightUnsubscribe();
+
+      const q = query(fightCollectionRef(), orderBy("createdAt", "desc"));
+
+      fightUnsubscribe = onSnapshot(q, (snapshot) => {
+        const posts = [];
+
+        snapshot.forEach((docSnap) => {
+          posts.push({
+            id: docSnap.id,
+            ...docSnap.data()
+          });
+        });
+
+        fightPostsCache = posts;
+        renderFightPosts(posts);
+        startCountdownTimer();
+        autoDeleteExpiredPosts();
+      }, (error) => {
+        alert("파이트 모집글 불러오기 실패: " + error.message);
+      });
+    }
+
+    function stopFightListener() {
+      if (fightUnsubscribe) {
+        fightUnsubscribe();
+        fightUnsubscribe = null;
+      }
+
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
+
+      fightPostsCache = [];
+    }
+
+
+    function resetFightForm() {
+      document.getElementById("fightTitleInput").value = "";
+      document.getElementById("fightDescription").value = "";
+      document.getElementById("fightMaxMembers").value = "7";
+      document.getElementById("fightRequiredLevel").value = "100";
+
+      initTimeSelects();
+      setConditionMode(false);
+
+      editingFightPostId = null;
+      document.getElementById("fightSubmitBtn").textContent = "모집글 올리기";
+      document.getElementById("fightCancelEditBtn").style.display = "none";
+      document.getElementById("editNotice").classList.remove("active");
+    }
+
+    function setTimeSelectFromStartAt(startAt) {
+      const hourSelect = document.getElementById("fightStartHour");
+      const minuteSelect = document.getElementById("fightStartMinute");
+
+      if (!hourSelect || !minuteSelect || !startAt) return;
+
+      const date = new Date(startAt);
+      hourSelect.value = String(date.getHours()).padStart(2, "0");
+
+      const minute = Math.round(date.getMinutes() / 5) * 5;
+      minuteSelect.value = String(minute >= 60 ? 55 : minute).padStart(2, "0");
+    }
+
+    window.editFightPost = function (postId) {
+      const post = fightPostsCache.find(item => item.id === postId);
+
+      if (!post) {
+        alert("수정할 모집글을 찾을 수 없습니다.");
+        return;
+      }
+
+      if (!currentUser || currentUser.uid !== post.leaderUid) {
+        alert("모집글 작성자만 수정할 수 있습니다.");
+        return;
+      }
+
+      editingFightPostId = postId;
+      switchTab("fight");
+
+      document.getElementById("fightContent").value = post.content || "스태틱";
+      document.getElementById("fightTitleInput").value = post.title || "";
+      document.getElementById("fightMaxMembers").value = post.maxMembers || 7;
+      setTimeSelectFromStartAt(post.startAt);
+      document.getElementById("fightDescription").value = post.description || "";
+
+      recruitConditions = getPostConditions(post).map(condition => ({ ...condition }));
+
+      if (recruitConditions.length) {
+        setConditionMode(true);
+        renderRecruitConditionList();
+        updateConditionPreview();
+      } else {
+        setConditionMode(false);
+      }
+
+      document.getElementById("fightSubmitBtn").textContent = "수정 완료";
+      document.getElementById("fightCancelEditBtn").style.display = "block";
+      document.getElementById("editNotice").classList.add("active");
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.cancelFightEdit = function () {
+      resetFightForm();
+    };
+
+    window.createFightPost = async function () {
+      if (!currentUser) {
+        alert("먼저 구글 로그인을 해주세요.");
+        return;
+      }
+
+      if (!currentNickname) {
+        alert("먼저 닉네임을 설정해주세요.");
+        return;
+      }
+
+      const content = document.getElementById("fightContent").value;
+      const title = document.getElementById("fightTitleInput").value.trim();
+      const maxMembers = clamp(Number(document.getElementById("fightMaxMembers").value) || 2, 2, 20);
+      const selectedTime = getSelectedStartTime();
+      const startTime = selectedTime.startTime;
+      const startAt = selectedTime.startAt;
+      const conditions = getActiveRecruitConditions();
+      const description = document.getElementById("fightDescription").value.trim();
+
+      if (!title) {
+        alert("제목을 입력해주세요.");
+        return;
+      }
+
+      try {
+        if (editingFightPostId) {
+          await updateDoc(doc(db, "fightPosts", editingFightPostId), {
+            content,
+            title,
+            maxMembers,
+            startTime,
+            startAt,
+            conditions,
+            selections: [],
+            description,
+            updatedAt: new Date().toISOString()
+          });
+        } else {
+          await addDoc(fightCollectionRef(), {
+            content,
+            title,
+            maxMembers,
+            startTime,
+            startAt,
+            conditions,
+            selections: [],
+            description,
+            leaderUid: currentUser.uid,
+            leaderNickname: currentNickname,
+            members: [
+              {
+                uid: currentUser.uid,
+                nickname: currentNickname
+              }
+            ],
+            createdAt: serverTimestamp(),
+            updatedAt: new Date().toISOString()
+          });
+        }
+
+        resetFightForm();
+      } catch (error) {
+        alert(editingFightPostId ? "모집글 수정 실패: " + error.message : "모집글 생성 실패: " + error.message);
+      }
+    };
+
+
+    window.selectConditionSlot = async function (postId, conditionsJson, selectionsJson, conditionIndex) {
+      if (!currentUser) {
+        alert("먼저 구글 로그인을 해주세요.");
+        return;
+      }
+
+      if (!currentNickname) {
+        alert("먼저 닉네임을 설정해주세요.");
+        return;
+      }
+
+      const conditions = JSON.parse(decodeURIComponent(conditionsJson || "%5B%5D"));
+      const selections = JSON.parse(decodeURIComponent(selectionsJson || "%5B%5D"));
+      const condition = conditions[conditionIndex];
+
+      if (!condition) return;
+
+      const myLevel = getLevel(condition.category, condition.equipment);
+
+      if (myLevel < condition.level) {
+        alert(`참가조건 미달입니다. 내 ${condition.equipment} ${myLevel} / 필요 ${condition.level}`);
+        return;
+      }
+
+      const occupiedByOther = selections.find(selection =>
+        selection.conditionIndex === conditionIndex && selection.uid !== currentUser.uid
+      );
+
+      if (occupiedByOther) {
+        alert("이미 다른 사람이 선택한 무기입니다.");
+        return;
+      }
+
+      const alreadyMine = selections.find(selection =>
+        selection.conditionIndex === conditionIndex && selection.uid === currentUser.uid
+      );
+
+      let nextSelections = selections.filter(selection => selection.uid !== currentUser.uid);
+
+      if (!alreadyMine) {
+        nextSelections.push({
+          uid: currentUser.uid,
+          nickname: currentNickname,
+          conditionIndex,
+          role: condition.role,
+          category: condition.category,
+          equipment: condition.equipment,
+          level: condition.level
+        });
+      }
+
+      try {
+        await updateDoc(doc(db, "fightPosts", postId), {
+          selections: nextSelections,
+          updatedAt: new Date().toISOString()
+        });
+      } catch (error) {
+        alert("선택 실패: " + error.message);
+      }
+    };
+
+    window.joinFightPost = async function (postId, membersJson, maxMembers, conditionsJson) {
+      if (!currentUser) {
+        alert("먼저 구글 로그인을 해주세요.");
+        return;
+      }
+
+      if (!currentNickname) {
+        alert("먼저 닉네임을 설정해주세요.");
+        return;
+      }
+
+      const members = JSON.parse(decodeURIComponent(membersJson));
+
+      if (members.some(member => member.uid === currentUser.uid)) {
+        alert("이미 참가한 모집글입니다.");
+        return;
+      }
+
+      if (members.length >= maxMembers) {
+        alert("모집 인원이 가득 찼습니다.");
+        return;
+      }
+
+      const conditions = JSON.parse(decodeURIComponent(conditionsJson || "%5B%5D"));
+
+      if (!canJoinByConditions(conditions)) {
+        alert("참가조건 미달입니다. 충족하는 모집 조건이 없습니다.");
+        return;
+      }
+
+      try {
+        await updateDoc(doc(db, "fightPosts", postId), {
+          members: arrayUnion({
+            uid: currentUser.uid,
+            nickname: currentNickname
+          }),
+          updatedAt: new Date().toISOString()
+        });
+      } catch (error) {
+        alert("참가 실패: " + error.message);
+      }
+    };
+
+    window.leaveFightPost = async function (postId, membersJson) {
+      if (!currentUser || !currentNickname) return;
+
+      const members = JSON.parse(decodeURIComponent(membersJson));
+      const me = members.find(member => member.uid === currentUser.uid);
+
+      if (!me) {
+        alert("참가한 모집글이 아닙니다.");
+        return;
+      }
+
+      try {
+        await updateDoc(doc(db, "fightPosts", postId), {
+          members: arrayRemove(me),
+          updatedAt: new Date().toISOString()
+        });
+      } catch (error) {
+        alert("나가기 실패: " + error.message);
+      }
+    };
+
+    window.deleteFightPost = async function (postId, leaderUid) {
+      if (!currentUser || currentUser.uid !== leaderUid) {
+        alert("모집글 작성자만 삭제할 수 있습니다.");
+        return;
+      }
+
+      if (!confirm("이 모집글을 삭제할까요?")) return;
+
+      try {
+        await deleteDoc(doc(db, "fightPosts", postId));
+      } catch (error) {
+        alert("삭제 실패: " + error.message);
+      }
+    };
+
+
+    async function autoDeleteExpiredPosts() {
+      if (!currentUser || !fightPostsCache.length) return;
+
+      const expiredPosts = fightPostsCache.filter(post => {
+        const info = getTimeLeftInfo(post.startAt);
+        return info.expiredForDelete && post.leaderUid === currentUser.uid;
+      });
+
+      for (const post of expiredPosts) {
+        try {
+          await deleteDoc(doc(db, "fightPosts", post.id));
+        } catch (error) {
+          console.warn("자동 삭제 실패:", error);
+        }
+      }
+    }
+
+    function renderFightPosts(posts) {
+      const fightList = document.getElementById("fightList");
+      const count = document.getElementById("fightPostCount");
+
+      if (!fightList || !count) return;
+
+      if (!currentUser) {
+        fightList.innerHTML = `<div class="empty-fight">로그인하면 실시간 컨텐츠 모집글을 볼 수 있습니다.</div>`;
+        return;
+      }
+
+      if (!posts.length) {
+        fightList.innerHTML = `<div class="empty-fight">아직 올라온 컨텐츠 모집글이 없습니다.</div>`;
+        return;
+      }
+
+      const visiblePosts = posts
+        .filter(post => !getTimeLeftInfo(post.startAt).expiredForDelete)
+        .filter(post => contentFilter === "전체" || post.content === contentFilter)
+        .sort((a, b) => {
+          if (fightSortMode === "soon") {
+            return getTimeLeftInfo(a.startAt).diffMs - getTimeLeftInfo(b.startAt).diffMs;
+          }
+
+          const aCreated = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+          const bCreated = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+
+          return bCreated - aCreated;
+        });
+
+      count.textContent = `${visiblePosts.length}개 모집중`;
+
+      if (!visiblePosts.length) {
+        fightList.innerHTML = `<div class="empty-fight">아직 올라온 컨텐츠 모집글이 없습니다.</div>`;
+        return;
+      }
+
+      fightList.innerHTML = visiblePosts.map(post => {
+        const timeInfo = getTimeLeftInfo(post.startAt);
+        const members = post.members || [];
+        const membersJson = encodeURIComponent(JSON.stringify(members));
+        const isLeader = currentUser && currentUser.uid === post.leaderUid;
+        const isJoined = currentUser && members.some(member => member.uid === currentUser.uid);
+        const maxMembers = post.maxMembers || 7;
+        const conditions = getPostConditions(post);
+        const selections = Array.isArray(post.selections) ? post.selections : [];
+        const conditionsJson = encodeURIComponent(JSON.stringify(conditions));
+        const selectionsJson = encodeURIComponent(JSON.stringify(selections));
+
+        return `
+          <div class="fight-post">
+            <div class="fight-post-head">
+              <div>
+                <div class="fight-title">${escapeHtml(post.title || "제목 없음")}</div>
+                <div class="fight-meta">
+                  컨텐츠: ${escapeHtml(post.content || "-")}<br>
+                  출발: ${escapeHtml(post.startTime || "미정")}<br>
+                  <span class="time-badge ${timeInfo.colorClass}">${timeInfo.text}</span><br>
+                  조건: ${getRequirementText(post)}<br>
+                  ${conditions.length ? `참가조건: ${getMyRequirementStatus(post)}<br>` : ""}
+                  파티장: ${escapeHtml(post.leaderNickname || "-")}
+                </div>
+              </div>
+              <div class="badge">${conditions.length ? `${selections.length}/${conditions.length}` : `${members.length}/${maxMembers}`}</div>
+            </div>
+
+            ${post.description ? `<div class="fight-desc">${escapeHtml(post.description)}</div>` : ""}
+
+            ${conditions.length ? renderConditionSlots(post.id, conditions, selections, conditionsJson, selectionsJson) : ""}
+
+            <div class="member-list">
+              ${members.map(member => `<span class="member-chip">${escapeHtml(member.nickname || "이름없음")}</span>`).join("")}
+            </div>
+
+            <div class="fight-actions">
+              ${!conditions.length
+                ? (isJoined
+                    ? `<button class="btn btn-secondary" onclick="leaveFightPost('${post.id}', '${membersJson}')">나가기</button>`
+                    : `<button class="btn" onclick="joinFightPost('${post.id}', '${membersJson}', ${maxMembers}, '${conditionsJson}')">참가</button>`
+                  )
+                : ""
+              }
+              ${isLeader ? `<button class="btn btn-secondary" onclick="editFightPost('${post.id}')">수정</button>` : ""}
+              ${isLeader ? `<button class="btn-danger" style="width:auto; margin-top:0;" onclick="deleteFightPost('${post.id}', '${post.leaderUid}')">삭제</button>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+
+
+    function renderConditionSlots(postId, conditions, selections, conditionsJson, selectionsJson) {
+      if (!conditions.length) return "";
+
+      return `
+        <div class="condition-slot-list">
+          ${conditions.map((condition, index) => {
+            const myLevel = getLevel(condition.category, condition.equipment);
+            const selected = selections.find(selection => selection.conditionIndex === index);
+            const isMine = selected && currentUser && selected.uid === currentUser.uid;
+            const canSelect = myLevel >= condition.level;
+            let className = "condition-slot-btn";
+
+            if (isMine) {
+              className += " selected";
+            } else if (selected) {
+              className += " occupied";
+            } else if (canSelect) {
+              className += " available";
+            } else {
+              className += " unavailable";
+            }
+
+            const clickAttr = (!selected || isMine) && canSelect
+              ? `onclick="selectConditionSlot('${postId}', '${conditionsJson}', '${selectionsJson}', ${index})"`
+              : "";
+
+            const statusText = selected
+              ? `선택됨: ${escapeHtml(selected.nickname)}`
+              : (canSelect ? `선택 가능 · 내 숙련도 ${myLevel}` : `조건 미달 · 내 숙련도 ${myLevel}`);
+
+            return `
+              <button class="${className}" ${clickAttr}>
+                <span class="condition-slot-title">
+                  ${getEquipmentIconHtml(condition.equipment, "condition-slot-icon")}
+                  <span>
+                    ${escapeHtml(condition.role)} · ${escapeHtml(condition.equipment)} ${condition.level}레벨 이상
+                    <span class="slot-user">${statusText}</span>
+                  </span>
+                </span>
+              </button>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function getPostConditions(post) {
+      if (Array.isArray(post.conditions)) return post.conditions;
+
+      if (post.requiredEquipment && post.requiredLevel > 0) {
+        return [{
+          role: "조건",
+          category: post.requiredCategory,
+          equipment: post.requiredEquipment,
+          level: post.requiredLevel
+        }];
+      }
+
+      return [];
+    }
+
+    function canJoinByConditions(conditions) {
+      if (!conditions || !conditions.length) return true;
+
+      return conditions.some(condition =>
+        getLevel(condition.category, condition.equipment) >= condition.level
+      );
+    }
+
+    function getRequirementText(post) {
+      const conditions = getPostConditions(post);
+
+      if (!conditions.length) return "조건 없음";
+
+      return conditions
+        .map(condition => `${escapeHtml(condition.role)} ${escapeHtml(condition.equipment)} ${condition.level}레벨 이상`)
+        .join(" / ");
+    }
+
+    function getMyRequirementStatus(post) {
+      const conditions = getPostConditions(post);
+
+      if (!conditions.length) return "충족";
+
+      const matched = conditions.filter(condition =>
+        getLevel(condition.category, condition.equipment) >= condition.level
+      );
+
+      if (matched.length > 0) {
+        return `가능: ${matched.map(condition => `${condition.role} ${condition.equipment}`).join(", ")}`;
+      }
+
+      return "미달";
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    window.clearAll = async function () {
+      if (!currentUser) {
+        alert("먼저 구글 로그인을 해주세요.");
+        return;
+      }
+
+      if (!confirm("전체 숙련도 데이터를 삭제할까요?")) return;
+
+      try {
+        masteryData = {};
+        await deleteDoc(userDocRef());
+        document.getElementById("saveStatus").textContent = "전체 삭제 완료";
+        render();
+      } catch (error) {
+        document.getElementById("saveStatus").textContent = "삭제 실패";
+        alert("삭제 실패: " + error.message);
+      }
+    };
+
+    function render() {
+      renderCategoryButtons();
+      updateSummary();
+      renderSelectedCategory();
+    }
+
+    initTimeSelects();
+    render();
+    renderFightPosts([]);
+    setConditionMode(false);
+    updateConditionPreview();
+    updateConditionEquipmentPreview();
+  </script>
+</body>
+</html>
